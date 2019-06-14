@@ -15,8 +15,44 @@ limitations under the License.
 */
 package main
 
-import "gitlab.com/draaft/cli/cmd"
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"time"
+
+	"gitlab.com/draaft/cli/cmd"
+)
 
 func main() {
-  cmd.Execute()
+	// APIURL := "http://127.0.0.1:8000/public_api/pre-alpha"
+	// PATH := "/channels/133"
+	url := "http://127.0.0.1:8000/public_api/pre-alpha/channels/133"
+
+	// Build the request
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Fatal("Error reading request. ", err)
+	}
+
+	req.Header.Set("Cache-Control", "no-cache")
+	req.Header.Set("Authorization", "Token 0.47152957692742348")
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: time.Second * 10}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Error reading response. ", err)
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal("Error reading body. ", err)
+	}
+
+	fmt.Printf("%s\n", body)
+	cmd.Execute()
 }
