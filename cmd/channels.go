@@ -18,10 +18,20 @@ package cmd
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
+	"time"
 
 	"github.com/spf13/cobra"
 )
+
+// Channel is used to handle channels/ endpoint Response
+type Channel struct {
+	ID        int        `json:"id"`
+	Name      string     `json:"name"`
+	Hierarchy string     `json:"hierarchy"`
+	Children  []*Channel `json:"children"`
+}
 
 // channelsCmd represents the channels command
 var channelsCmd = &cobra.Command{
@@ -35,33 +45,41 @@ This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("channels called")
-		APIURL := "http://127.0.0.1:8000/public_api/pre-alpha/channels/133"
-		// var netTransport = &http.Transport{
-		// 	Dial: (&net.Dialer{
-		// 	  Timeout: 5 * time.Second,
-		// 	}).Dial,
-		// 	TLSHandshakeTimeout: 5 * time.Second,
-		//   }
-		//   var netClient = &http.Client{
-		// 	Timeout: time.Second * 10,
-		// 	Transport: netTransport,
-		//   }
-		//   response, _ := netClient.Get(url)
-		req, err := http.NewRequest(http.MethodGet, APIURL, nil)
+		// APIURL := "http://127.0.0.1:8000/public_api/pre-alpha"
+		// PATH := "/channels/133"
+		url := "http://127.0.0.1:8000/public_api/pre-alpha/channels/133"
+
+		// Build the request
+		req, err := http.NewRequest("GET", url, nil)
 		if err != nil {
-			panic(err)
+			log.Fatal("Error reading request. ", err)
 		}
-		client := http.DefaultClient
+
+		req.Header.Set("Cache-Control", "no-cache")
+		req.Header.Set("Authorization", "Token 0.47152957692742348")
+		req.Header.Set("Content-Type", "application/json")
+
+		client := &http.Client{Timeout: time.Second * 10}
+
 		resp, err := client.Do(req)
 		if err != nil {
-			panic(err)
+			log.Fatal("Error reading response. ", err)
 		}
 		defer resp.Body.Close()
+
 		body, err := ioutil.ReadAll(resp.Body)
 		if err != nil {
-			panic(err)
+			log.Fatal("Error reading body. ", err)
 		}
-		fmt.Printf("%v", string(body))
+
+		fmt.Printf("%s\n", body)
+		// channels := Channel{}
+		// jsonErr := json.Unmarshal(body, &channels)
+		// if jsonErr != nil {
+		// 	log.Fatal(jsonErr)
+		// }
+
+		// fmt.Println(&channels)
 	},
 }
 
