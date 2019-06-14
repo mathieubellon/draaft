@@ -29,8 +29,25 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`draaft channels [FILE]`](#draaft-channels-file)
 * [`draaft hello [FILE]`](#draaft-hello-file)
 * [`draaft help [COMMAND]`](#draaft-help-command)
+
+## `draaft channels [FILE]`
+
+describe the command here
+
+```
+USAGE
+  $ draaft channels [FILE]
+
+OPTIONS
+  -f, --force
+  -h, --help       show CLI help
+  -n, --name=name  name to print
+```
+
+_See code: [src/commands/channels.ts](https://github.com/draaft/cli/blob/v0.0.0/src/commands/channels.ts)_
 
 ## `draaft hello [FILE]`
 
