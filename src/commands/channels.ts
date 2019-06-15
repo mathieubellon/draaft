@@ -46,16 +46,15 @@ export default class Channels extends Command {
     // Ask user which channel to pull content from
     let responses: any = await inquirer.prompt([{
       name: 'channel',
-      message: 'Select a channel (and its descendants) to get content from',
+      message: 'Select a channel (and its descendants) to get content from\n',
       type: 'list',
       choices: promptChoices,
     }])
-    console.log('You chose ' + responses.channel)
+
     let qs = querystring.stringify({ channel: responses.channel })
 
     // start the spinner
-    console.log(responses)
-    const spinner = ora(`Downloading content for channel ${responses.channel} and children channels`)
+    const spinner = ora(`Downloading content for channel ${responses.channel}`)
     spinner.color = 'yellow'
     spinner.start()
     await getItems(draaftConfig, qs)
