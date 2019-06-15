@@ -46,7 +46,7 @@ export default class Channels extends Command {
     // Ask user which channel to pull content from
     let responses: any = await inquirer.prompt([{
       name: 'channel',
-      message: 'Select a channel (and its descendants) to get content from\n',
+      message: 'Select a channel to pull content from\n',
       type: 'list',
       choices: promptChoices,
     }])

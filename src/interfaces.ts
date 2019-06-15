@@ -5,6 +5,7 @@ export interface ExtensionConfig {
     apiEndpointItems: string;
     apiEndpointChannels: string,
     apiBaseUrl: string;
+    configDir: string;
     confirmFetch?: boolean;
     defaultLanguage?: string;
     fetchForce?: boolean;
