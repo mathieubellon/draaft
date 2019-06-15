@@ -1,4 +1,4 @@
-import * as interf from './utils/interfaces';
+import * as interf from './interfaces';
 
 const draaftConfig: interf.ExtensionConfig = {
     apiEndpointItems: 'items',
