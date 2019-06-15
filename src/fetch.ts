@@ -13,7 +13,6 @@ export function getItems(config: interf.ExtensionConfig, querystring?: string): 
     const myURL = new URL(config.apiBaseUrl + '/' + config.apiEndpointItems)
     if (querystring) {
         myURL.search = querystring
-        console.log(myURL)
     }
     return axiosInstance.get(myURL.href)
 }

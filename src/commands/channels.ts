@@ -1,12 +1,12 @@
 import * as _ from 'lodash'
 import * as inquirer from 'inquirer'
+import * as ora from 'ora'
 import * as querystring from 'querystring'
 
 import { Command, flags } from '@oclif/command'
 import { getChannels, getItems } from '../fetch'
 
 import { Channel } from '../types'
-import cli from 'cli-ux'
 import draaftConfig from '../config'
 
 export default class Channels extends Command {
@@ -50,21 +50,24 @@ export default class Channels extends Command {
       type: 'list',
       choices: promptChoices,
     }])
-    console.log('you chose ' + responses.channel)
+    console.log('You chose ' + responses.channel)
     let qs = querystring.stringify({ channel: responses.channel })
 
     // start the spinner
-    cli.action.start('Pulling content ... (may take a while)')
+    console.log(responses)
+    const spinner = ora(`Downloading content for channel ${responses.channel} and children channels`)
+    spinner.color = 'yellow'
+    spinner.start()
     await getItems(draaftConfig, qs)
       .then(function (response: any) {
-        cli.action.stop('Content downloaded') // shows 'starting a process... custom message'
+        spinner.succeed('Content successfully downloaded')
         response.data.results.forEach((item: any) => {
-          console.log(item)
+          //console.log(item)
         })
 
       })
       .catch(function (error: any) {
-        cli.action.stop('Content downloaded') // shows 'starting a process... custom message'
+        spinner.fail('Content not downloaded, error')
         console.error(error)
       })
 
