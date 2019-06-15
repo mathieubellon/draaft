@@ -1,9 +1,9 @@
-import * as _ from 'lodash';
-import * as interf from './interfaces';
+import * as _ from 'lodash'
+import * as interf from './interfaces'
 
-import axios from 'axios';
+import axios from 'axios'
 
-export function getChannels(config: interf.ExtensionConfig): void {
+export function getChannels(config: interf.ExtensionConfig): Promise<void> {
     // var writeToThatPath = file.fsPath;
     // TODO fix this ugly shit before thomas sees it
     let url = config.apiBaseUrl + '/' + config.apiEndpointChannels;
@@ -12,13 +12,5 @@ export function getChannels(config: interf.ExtensionConfig): void {
             Authorization: `Token ${config.token}`
         }
     });
-    axiosInstance.get(url)
-    .then(function (response: any) {
-        response.data.forEach((channel: any) => {
-            console.log(channel)
-        });
-    })
-    .catch(function (error:any) {
-        console.error(error)
-    });
+    return axiosInstance.get(url)
 }
