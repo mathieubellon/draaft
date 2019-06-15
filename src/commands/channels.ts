@@ -1,5 +1,8 @@
 import {Command, flags} from '@oclif/command'
 
+import draaftConfig from '../config'
+import {getChannels} from '../utils/fetch'
+
 export default class Channels extends Command {
   static description = 'describe the command here'
 
@@ -18,6 +21,7 @@ export default class Channels extends Command {
 
     const name = flags.name || 'world'
     this.log(`hello ${name} from /Users/matthieu/apps/draaft-cli/src/commands/channels.ts`)
+    getChannels(draaftConfig)
     if (args.file && flags.force) {
       this.log(`you input --force and --file: ${args.file}`)
     }
