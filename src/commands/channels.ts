@@ -39,10 +39,10 @@ export default class Channels extends Command {
       .catch(function (error: any) {
         console.error(error)
       })
-    console.log(arrayResp)
+    // console.log(arrayResp)
     let promptChoices = _.map(arrayResp, (elt) => {
       return {
-        name: elt.name,
+        name: elt.hierarchy,
         value: elt.id
       }
     })
