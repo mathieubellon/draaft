@@ -16,6 +16,7 @@ limitations under the License.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -27,11 +28,15 @@ import (
 
 // Channel is used to handle channels/ endpoint Response
 type Channel struct {
-	ID        int        `json:"id"`
-	Name      string     `json:"name"`
-	Hierarchy string     `json:"hierarchy"`
-	Children  []*Channel `json:"children"`
+	ID        int             `json:"id"`
+	Name      string          `json:"name"`
+	Hierarchy string          `json:"hierarchy"`
+	Children  json.RawMessage `json:"children"`
+	Level     int             `json:"level"`
 }
+
+// ResponseChannels handle API response
+type ResponseChannels []Channel
 
 // channelsCmd represents the channels command
 var channelsCmd = &cobra.Command{
@@ -56,7 +61,7 @@ to quickly create a Cobra application.`,
 		}
 
 		req.Header.Set("Cache-Control", "no-cache")
-		req.Header.Set("Authorization", "Token 0.47152957692742348")
+		req.Header.Set("Authorization", "Token 0.0005775177851319313")
 		req.Header.Set("Content-Type", "application/json")
 
 		client := &http.Client{Timeout: time.Second * 10}
@@ -73,11 +78,14 @@ to quickly create a Cobra application.`,
 		}
 
 		fmt.Printf("%s\n", body)
-		// channels := Channel{}
-		// jsonErr := json.Unmarshal(body, &channels)
-		// if jsonErr != nil {
-		// 	log.Fatal(jsonErr)
-		// }
+		keys := []Channel{}
+		jsonErr := json.Unmarshal(body, &keys)
+		if jsonErr != nil {
+			log.Fatal(jsonErr)
+		}
+		for _, channel := range keys {
+			fmt.Println(channel.Name)
+		}
 
 		// fmt.Println(&channels)
 	},
