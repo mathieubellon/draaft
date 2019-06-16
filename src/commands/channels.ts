@@ -78,16 +78,30 @@ export default class Channels extends Command {
     //console.log(selectedChannel)
 
     // Build top channel
-    if (selectedChannel) {
-      console.log("Create folder " + selectedChannel.name)
+    function unfoldHierarchy(channel: Channel) {
+
+      let indentemoji = "   "
+      let indentation = indentemoji.repeat(channel.level)
+      console.log(`${indentation} 📁 ${channel.name}`)
+      // Filter direct items attached to this top channel
+      let directItems = _.filter(allItems, item => {
+        return item.channels.includes(channel.id)
+      })
+      directItems.forEach(element => {
+        console.log(`${indentation} 📄 ${element.title}`)
+      })
+      if (channel.children.length === 0) { return }
+      channel.children.forEach(child => {
+        unfoldHierarchy(child)
+      })
     }
 
-    // Filter direct items attached to this top channel
-    let directItems = _.filter(allItems, item => {
-      return item.channels.includes(responses.channel)
-    })
-    directItems.forEach(element => {
-      console.log(element.title)
-    });
+    if (selectedChannel) {
+      unfoldHierarchy(selectedChannel)
+    }
+
+
+
+
   }
 }
