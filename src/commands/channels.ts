@@ -1,6 +1,7 @@
 import * as _ from 'lodash'
 import * as inquirer from 'inquirer'
 import * as ora from 'ora'
+import * as prepare from '../prepare'
 import * as querystring from 'querystring'
 import * as write from '../write'
 
@@ -9,6 +10,8 @@ import { getChannels, getItems } from '../fetch'
 
 import { Channel } from '../types'
 import draaftConfig from '../config'
+
+import slugify = require('@sindresorhus/slugify');
 
 export default class Channels extends Command {
   static description = 'describe the command here'
@@ -82,13 +85,13 @@ export default class Channels extends Command {
 
       let indentemoji = "   "
       let indentation = indentemoji.repeat(channel.level)
-      console.log(`${indentation} 📁 ${channel.name}`)
+      console.log(`${indentation} 📁 ${slugify(channel.name)}`)
       // Filter direct items attached to this top channel
       let directItems = _.filter(allItems, item => {
         return item.channels.includes(channel.id)
       })
       directItems.forEach(element => {
-        console.log(`${indentation} 📄 ${element.title}`)
+        console.log(`${indentation} 📄 ${prepare.filename(element, draaftConfig)}`)
       })
       if (channel.children.length === 0) { return }
       channel.children.forEach(child => {
