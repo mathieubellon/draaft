@@ -12,9 +12,6 @@ export function getChannels(config: interf.ExtensionConfig): Promise<void> {
 
 export function getItems(config: interf.ExtensionConfig, qsparams?: any): Promise<void> {
     const myURL = new URL(config.apiBaseUrl + '/' + config.apiEndpointItems)
-    let localquerystring = _.merge(qsparams, {
-        omit: 'cargo'
-    })
-    myURL.search = querystring.stringify(localquerystring)
+    myURL.search = querystring.stringify(qsparams)
     return axiosInstance.get(myURL.href)
 }

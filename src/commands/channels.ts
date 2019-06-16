@@ -1,6 +1,7 @@
 import * as _ from 'lodash'
 import * as inquirer from 'inquirer'
 import * as ora from 'ora'
+import * as path from 'path'
 import * as prepare from '../prepare'
 import * as querystring from 'querystring'
 import * as write from '../write'
@@ -81,26 +82,35 @@ export default class Channels extends Command {
     //console.log(selectedChannel)
 
     // Build top channel
-    function unfoldHierarchy(channel: Channel) {
+    function unfoldHierarchy(channel: Channel, parentPath: string) {
 
       let indentemoji = "   "
       let indentation = indentemoji.repeat(channel.level)
+      let channelslug = slugify(channel.name)
       console.log(`${indentation} 📁 ${slugify(channel.name)}`)
+      let currentFolder = path.join(parentPath, channelslug)
+      
       // Filter direct items attached to this top channel
       let directItems = _.filter(allItems, item => {
-        return item.channels.includes(channel.id)
+        if(item.channels && item.channels.length >0){
+          return item.channels.includes(channel.id)
+        }
       })
       directItems.forEach(element => {
-        console.log(`${indentation} 📄 ${prepare.filename(element, draaftConfig)}`)
+        let cargo = prepare.fileCargo(channel, element)
+        let fullFilePath = prepare.fullFilePath(currentFolder, element, draaftConfig)
+        console.log(`${indentation} 📄 ${currentFolder} ${prepare.filename(element, draaftConfig)}`)
       })
       if (channel.children.length === 0) { return }
       channel.children.forEach(child => {
-        unfoldHierarchy(child)
+        unfoldHierarchy(child, currentFolder)
       })
     }
 
     if (selectedChannel) {
-      unfoldHierarchy(selectedChannel)
+      let whereami = process.cwd()
+      console.log(whereami)
+      unfoldHierarchy(selectedChannel, 'content')
     }
 
 
