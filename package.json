@@ -14,6 +14,7 @@
         "@sindresorhus/slugify": "^0.9.1",
         "@types/inquirer": "^6.0.3",
         "axios": "^0.19.0",
+        "fs-extra": "^8.0.1",
         "gray-matter": "^4.0.2",
         "inquirer": "^6.3.1",
         "lodash": "^4.17.11",
@@ -53,6 +54,7 @@
     "oclif": {
         "commands": "./lib/commands",
         "bin": "draaft",
+        "dirname": ".draaft",
         "plugins": [
             "@oclif/plugin-help"
         ]
