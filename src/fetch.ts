@@ -1,5 +1,6 @@
 import * as _ from 'lodash'
 import * as interf from './interfaces'
+import * as querystring from 'querystring'
 import * as url from 'url'
 
 import { axiosInstance } from './axios'
@@ -9,10 +10,11 @@ export function getChannels(config: interf.ExtensionConfig): Promise<void> {
     return axiosInstance.get(url)
 }
 
-export function getItems(config: interf.ExtensionConfig, querystring?: string): Promise<void> {
+export function getItems(config: interf.ExtensionConfig, qsparams?: any): Promise<void> {
     const myURL = new URL(config.apiBaseUrl + '/' + config.apiEndpointItems)
-    if (querystring) {
-        myURL.search = querystring
-    }
+    let localquerystring = _.merge(qsparams, {
+        omit: 'cargo'
+    })
+    myURL.search = querystring.stringify(localquerystring)
     return axiosInstance.get(myURL.href)
 }

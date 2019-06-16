@@ -2,6 +2,7 @@ import * as _ from 'lodash'
 import * as inquirer from 'inquirer'
 import * as ora from 'ora'
 import * as querystring from 'querystring'
+import * as write from '../write'
 
 import { Command, flags } from '@oclif/command'
 import { getChannels, getItems } from '../fetch'
@@ -51,24 +52,42 @@ export default class Channels extends Command {
       choices: promptChoices,
     }])
 
-    let qs = querystring.stringify({ channel: responses.channel })
+    let qs = { channels: responses.channel }
 
     // start the spinner
     const spinner = ora(`Downloading content for channel ${responses.channel}`)
     spinner.color = 'yellow'
     spinner.start()
+    let allItems: any[] = []
     await getItems(draaftConfig, qs)
       .then(function (response: any) {
-        spinner.succeed('Content successfully downloaded')
+        spinner.succeed(`${response.data.count} Content items successfully downloaded`)
         response.data.results.forEach((item: any) => {
-          //console.log(item)
+          //console.log(response.data.results)
+          allItems = response.data.results
         })
-
       })
       .catch(function (error: any) {
-        spinner.fail('Content not downloaded, error')
+        spinner.fail('Error while downloading content')
         console.error(error)
       })
 
+    // Build Content Folder
+
+    let selectedChannel = _.find(allChannels, { id: responses.channel })
+    //console.log(selectedChannel)
+
+    // Build top channel
+    if (selectedChannel) {
+      console.log("Create folder " + selectedChannel.name)
+    }
+
+    // Filter direct items attached to this top channel
+    let directItems = _.filter(allItems, item => {
+      return item.channels.includes(responses.channel)
+    })
+    directItems.forEach(element => {
+      console.log(element.title)
+    });
   }
 }
