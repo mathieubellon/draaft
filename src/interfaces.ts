@@ -12,8 +12,7 @@ export interface BuiltinConfig {
 
 export interface UserConfig {
   confirmFetch?: boolean
-  defaultLanguage?: string
-  fetchForce?: boolean
+  overwrite?: boolean
   excludeTopFolder: boolean // Because you may organize your content on Draaft and grouping all channels for this website
   i18nActivated: boolean
   i18nContentLayout: LayoutTypes

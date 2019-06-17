@@ -18,6 +18,8 @@ const userconf: interf.UserConfig = {
   i18nContentLayout: 'byfolder',
   i18nDefaultLanguage: 'en',
   token: '0.47152957692742348',
+  confirmFetch: false,
+  overwrite: false,
 }
 
 const cliconf: interf.CLIConfig = _.merge(builtinconf, userconf)
