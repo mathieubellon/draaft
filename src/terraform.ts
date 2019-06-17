@@ -6,7 +6,7 @@ import * as ora from 'ora'
 import * as path from 'path'
 import * as prepare from './prepare'
 import * as write from './write'
-import draaftConfig from './config'
+import Config from './config'
 import slugify = require('@sindresorhus/slugify')
 
 /**
@@ -31,9 +31,9 @@ export function terraForm(channel: Channel, items: any[], parentPath: string) {
       })
       directItems.forEach(element => {
         let cargo = prepare.fileCargo(channel, element)
-        let fullFilePath = prepare.fullFilePath(currentFolder, element, draaftConfig)
+        let fullFilePath = prepare.fullFilePath(currentFolder, element, Config)
         write.createFile(fullFilePath, cargo)
-        console.log(`${indentation} 📄 ${currentFolder} ${prepare.filename(element, draaftConfig)}`)
+        console.log(`${indentation} 📄 ${currentFolder} ${prepare.filename(element, Config)}`)
       })
       //if (channel.children.length === 0) { return }
       channel.children.forEach(child => {

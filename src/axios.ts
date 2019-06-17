@@ -1,7 +1,7 @@
 import axios from 'axios'
-import draaftConfig from './config'
+import Config from './config'
 export const axiosInstance = axios.create({
     headers: {
-        Authorization: `Token ${draaftConfig.token}`
+        Authorization: `Token ${Config.token}`
     }
 });

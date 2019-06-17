@@ -10,7 +10,7 @@ import { Command, flags } from '@oclif/command'
 import { getChannels, getItems } from '../fetch'
 
 import { Channel } from '../types'
-import draaftConfig from '../config'
+import Config from '../config'
 
 import { terraForm } from '../terraform'
 
@@ -30,7 +30,7 @@ export default class Pull extends Command {
   async run() {
     let allChannels: Channel[] = []
     // Get channels list
-    await getChannels(draaftConfig)
+    await getChannels(Config)
       .then(function (response: any) {
         response.data.forEach((channel: any) => {
           allChannels.push(channel)
@@ -67,7 +67,7 @@ export default class Pull extends Command {
     write.createFolder(destFolder).then(() => {
       const spinner = ora({ color: 'yellow', text: `Downloading content for channel ${selectedChannel.name}` }).start()
       let qs = { channels: selectedChannel.id }
-      getItems(draaftConfig, qs)
+      getItems(Config, qs)
         .then(function (response: any) {
           spinner.succeed(`${response.data.count} Content items successfully downloaded`)
           let allItems: any[] = response.data.results

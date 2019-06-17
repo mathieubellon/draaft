@@ -11,7 +11,7 @@ import * as slugify from '@sindresorhus/slugify';
  * @param document : Draaft document returned by Api
  * @param options : Extension configuration object
  */
-export function filename(document: any, options: interf.ExtensionConfig): string {
+export function filename(document: any, options: interf.CLIConfig): string {
   let buildedFileName = document.title ? slugify(document.title) : `notitle-${slugify(document.id)}`
   // Append correct extension
   if (options.i18nActivated && options.i18nContentLayout === 'byfilename' && document.language) {
@@ -31,7 +31,7 @@ export function filename(document: any, options: interf.ExtensionConfig): string
  * @param document : Draaft document returned by Api
  * @param options : Extension configuration object
  */
-export function fullFilePath(inFolder: string, document: any, options: interf.ExtensionConfig): string {
+export function fullFilePath(inFolder: string, document: any, options: interf.CLIConfig): string {
   let buildedFilePath = inFolder;
   // first level folder may be 'en' or 'fr' if user decides so
   if (options.i18nActivated && options.i18nContentLayout === 'byfolder') {
