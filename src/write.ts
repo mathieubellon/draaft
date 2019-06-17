@@ -11,11 +11,11 @@ export function createFolder(hierarchy: string): void {
     }
 }
 
-export function createFile(filename: string, filepath: string, filecargo: string): void {
-    let writer = fs.createWriteStream(filepath + '/' + filename);
+export function createFile(filepath: string, filecargo: string): void {
+    let writer = fs.createWriteStream(filepath);
     writer.write(filecargo);
     writer.on('error', function (err) {
-        console.log(err);
+        console.log('mais?', err);
         writer.end();
     });
 }

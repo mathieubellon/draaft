@@ -83,13 +83,13 @@ export default class Channels extends Command {
 
     // Build top channel
     function unfoldHierarchy(channel: Channel, parentPath: string) {
-
-      let indentemoji = "   "
-      let indentation = indentemoji.repeat(channel.level)
+      write.createFolder(parentPath)
+      console.log('create le path', parentPath)
+      let indentation = "   ".repeat(channel.level)
       let channelslug = slugify(channel.name)
       console.log(`${indentation} 📁 ${slugify(channel.name)}`)
-      let currentFolder = path.join(parentPath, channelslug)
-      
+
+      let currentFolder = path.join(parentPath, channelslug)    
       // Filter direct items attached to this top channel
       let directItems = _.filter(allItems, item => {
         if(item.channels && item.channels.length >0){
@@ -99,18 +99,20 @@ export default class Channels extends Command {
       directItems.forEach(element => {
         let cargo = prepare.fileCargo(channel, element)
         let fullFilePath = prepare.fullFilePath(currentFolder, element, draaftConfig)
+        write.createFile(fullFilePath, cargo)
         console.log(`${indentation} 📄 ${currentFolder} ${prepare.filename(element, draaftConfig)}`)
       })
-      if (channel.children.length === 0) { return }
+      //if (channel.children.length === 0) { return }
       channel.children.forEach(child => {
         unfoldHierarchy(child, currentFolder)
       })
     }
 
     if (selectedChannel) {
-      let whereami = process.cwd()
-      console.log(whereami)
-      unfoldHierarchy(selectedChannel, 'content')
+      let destFolder = path.join(process.cwd(), 'content')
+      console.log(destFolder)
+      write.createFolder(destFolder)
+      unfoldHierarchy(selectedChannel, destFolder)
     }
 
 
