@@ -1,22 +1,21 @@
-import * as fs from 'fs';
-import * as interf from './interfaces';
+import * as fs from 'fs-extra';
 
-export function createFolder(hierarchy: string): void {
-    try {
-        if (!fs.existsSync(hierarchy)) {
-            fs.mkdirSync(hierarchy, { recursive: true });
-        }
-    } catch (err) {
-        console.error(err)
-    }
+export function createFolder(hierarchy: string): Promise<void> {
+  console.log(`Ensure ${hierarchy} exists (create if not)`)
+  return fs.ensureDir(hierarchy) // dir has now been created, including the directory it is to be placed in
 }
 
 export function createFile(filepath: string, filecargo: string): void {
-    let writer = fs.createWriteStream(filepath);
-    writer.write(filecargo);
-    writer.on('error', function (err) {
-        console.log('mais?', err);
-        writer.end();
-    });
+  fs.ensureFile(filepath)
+    .then(() => {
+      fs.writeFile(filepath, filecargo)
+        .then(() => {
+          console.log('File successfully write' + filepath)
+        }).catch(error => {
+          console.error('File write error' + filepath + error)
+        })
+    })
+    .catch(err => {
+      console.error(err)
+    })
 }
-

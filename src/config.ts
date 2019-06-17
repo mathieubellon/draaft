@@ -9,7 +9,7 @@ const draaftConfig: interf.ExtensionConfig = {
     i18nActivated: false,
     i18nContentLayout: 'byfolder',
     i18nDefaultLanguage: 'en',
-    token: '0.0005775177851319313',
+    token: '0.47152957692742348',
 };
 
 export default draaftConfig
