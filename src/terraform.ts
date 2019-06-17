@@ -41,6 +41,6 @@ export function terraForm(channel: Channel, items: any[], parentPath: string) {
       })
     })
     .catch(error => {
-      console.error('Could not create channel folder : '+ error)
+      console.error('Could not create channel folder : ' + error)
     })
 }
