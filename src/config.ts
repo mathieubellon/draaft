@@ -13,7 +13,7 @@ const builtinconf: interf.BuiltinConfig = {
 }
 
 const userconf: interf.UserConfig = {
-  excludeTopFolder: true,
+  excludeTopFolder: false,
   i18nActivated: false,
   i18nContentLayout: 'byfolder',
   i18nDefaultLanguage: 'en',

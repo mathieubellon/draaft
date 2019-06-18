@@ -12,19 +12,22 @@ import { customSignal } from "../logging";
 const chalk = require('chalk')
 
 export default class Pull extends Command {
-  static description = 'describe the command here'
+  static description = 'Pull content from a platform channel. Build in destination folder acording to selected layout (only hugo.io at the moment)'
 
   static flags = {
     help: flags.help({ char: 'h' }),
-    // flag with a value (-n, --name=VALUE)
-    name: flags.string({ char: 'n', description: 'name to print' }),
-    // flag with no value (-f, --force)
-    force: flags.boolean({ char: 'f' }),
+    ssg: flags.string({ description: 'Your static site generator.', options: ['hugo', 'gatsby'], default:'hugo' }),
+    channel: flags.string({ description: 'Channel to pull content from [int]' }),
+    overwrite: flags.boolean({ char: 'o', description: '[default: false] If destination folder exists empty it before building', default: false}),
+    excludeTopFolder: flags.boolean({ char: 'e', description: '[default: hugo] Whether or not create a folder for the top directory', default: false}),
   }
 
   static args = [{ name: 'file' }]
 
   async run() {
+    // const {flags} = this.parse(Pull)
+    // if (flags.force) console.log('--force is set')
+    // if (flags.file) console.log(`--file is: ${flags.file}`)
     let spinner = this.spinner
     let channelsList: Channel[] = []
     let itemsList: any[] = []
