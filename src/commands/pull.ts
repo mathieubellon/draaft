@@ -5,12 +5,14 @@ import * as path from 'path'
 import * as write from '../write'
 
 import * as ora from 'ora'
-
-import { Command, flags } from '@oclif/command'
+import Command from '../base'
+import { flags } from '@oclif/command'
 import { getChannels, getItems } from '../fetch'
+import * as querystring from 'querystring'
+import * as url from 'url'
 
 import { Channel } from '../types'
-import Config from '../config'
+import config from '../config'
 
 import { terraForm } from '../terraform'
 
@@ -30,8 +32,14 @@ export default class Pull extends Command {
   async run() {
     let allChannels: Channel[] = []
     // Get channels list
-    await getChannels(Config)
-      .then(function (response: any) {
+    let urlstring = url.format({
+      protocol: config.apiScheme,
+      host: config.apiHost,
+      pathname: config.apiEndpointChannels,
+    })
+    const myURL = new URL(urlstring)
+    
+    await this.$axios.get(myURL.href).then(function (response: any) {
         response.data.forEach((channel: any) => {
           allChannels.push(channel)
         })

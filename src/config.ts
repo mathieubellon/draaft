@@ -17,7 +17,8 @@ const userconf: interf.UserConfig = {
   i18nActivated: false,
   i18nContentLayout: 'byfolder',
   i18nDefaultLanguage: 'en',
-  token: '0.47152957692742348',
+  //token: '0.47152957692742348',
+  token: '',
   confirmFetch: false,
   overwrite: false,
 }
