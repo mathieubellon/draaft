@@ -15,12 +15,12 @@ export default abstract class extends Command {
   // static flags = {
   //   loglevel: flags.string({ options: ['error', 'warn', 'info', 'debug'] })
   // }
-  token: string
+  token!: string
   $axios: any
   spinner: any
 
   async init() {
-    let API_TOKEN = ''
+    let API_TOKEN: any
 
     if (config.has('token')) {
       API_TOKEN = config.get('token')

@@ -1,21 +1,13 @@
+import {askChannels} from '../prompts'
+import {Channel} from '../types'
+import {flags} from '@oclif/command'
+import {getUrl} from '../fetch'
+import {terraForm} from '../terraform'
 import * as _ from 'lodash'
-import * as inquirer from 'inquirer'
-
 import * as path from 'path'
 import * as write from '../write'
-import { askChannels } from '../prompts'
-
-
 import Command from '../base'
-import { flags } from '@oclif/command'
-import { getUrl } from '../fetch'
-import * as querystring from 'querystring'
-import * as url from 'url'
-
-import { Channel } from '../types'
 import config from '../config'
-
-import { terraForm } from '../terraform'
 
 export default class Pull extends Command {
   static description = 'describe the command here'
@@ -54,24 +46,26 @@ export default class Pull extends Command {
     // TODO Better path selection (with autocomplete) + let user input its top content folder name
     let destFolder = path.join(process.cwd(), 'content')
     // Create top folder ro place all content in. Create if not exists.
+    spinner.start(`Checking destination folder ${destFolder}`)
     await write.createFolder(destFolder)
       .then(() => {
-        console.log(`Dest folder ${destFolder} created`)
+        spinner.succeed(`Destination folder created ${destFolder}`)
       })
       .catch(error => {
-        console.error(`Error while attempting to create dest folder ${destFolder}`, error)
+        spinner.fail(`Destination folder not created ${destFolder}`)
+        this.error(error, {exit: 1})
       })
     spinner.start(`Downloading content for channel ${selectedChannel.name}`)
     let qs = { channels: selectedChannel.id }
     const itemsURL = getUrl('items', config, qs)
     await this.$axios.get(itemsURL)
       .then(function (response: any) {
-        spinner.succeed(`${response.data.count} Content items successfully downloaded`)
+        spinner.succeed(`${response.data.count} Content items successfully downloaded, begin terraforming now..`)
         itemsList = response.data.results
       })
-      .catch(function (error: any) {
+      .catch(err => {
         spinner.fail('Error while downloading content')
-        console.error(error)
+        this.error(err, {exit: 1})
       })
     terraForm(selectedChannel, itemsList, destFolder)
   }
