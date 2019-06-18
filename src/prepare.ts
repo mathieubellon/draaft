@@ -35,7 +35,7 @@ export function fullFilePath(inFolder: string, document: any, options: interf.CL
   let buildedFilePath = inFolder;
   // first level folder may be 'en' or 'fr' if user decides so
   if (options.i18nActivated && options.i18nContentLayout === 'byfolder') {
-    let languageCode = document.language ? document.language.split("_")[0] : options.defaultLanguage; // fr_FR -> fr
+    let languageCode = document.language ? document.language.split("_")[0] : options.i18nDefaultLanguage; // fr_FR -> fr
     buildedFilePath = buildedFilePath + '/' + languageCode
   }
   // Depending on channels from draaft we need to create subfolders
