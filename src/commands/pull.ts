@@ -8,6 +8,7 @@ import * as path from 'path'
 import * as write from '../write'
 import Command from '../base'
 import config from '../config'
+import { customSignal } from "../logging";
 
 export default class Pull extends Command {
   static description = 'describe the command here'
@@ -23,18 +24,21 @@ export default class Pull extends Command {
   static args = [{ name: 'file' }]
 
   async run() {
-    const spinner = this.spinner
+    let spinner = this.spinner
     let channelsList: Channel[] = []
     let itemsList: any[] = []
+    
     // Get channels list
-
+    spinner.start(`Get channels list`)
     const channelsURL = getUrl('channels', config)
     await this.$axios.get(channelsURL)
       .then(function (response: any) {
+        spinner.succeed(`Channels list downloaded`)
         channelsList = response.data
       })
       .catch(function (error: any) {
-        console.error(error)
+        spinner.fail('Error while downloading channels list')
+        this.error(err, {exit: 1})
       })
 
     let pickedChannel:any = await askChannels(channelsList)
@@ -60,13 +64,15 @@ export default class Pull extends Command {
     const itemsURL = getUrl('items', config, qs)
     await this.$axios.get(itemsURL)
       .then(function (response: any) {
-        spinner.succeed(`${response.data.count} Content items successfully downloaded, begin terraforming now..`)
+        spinner.succeed(`${response.data.count} Content items successfully downloaded from ${selectedChannel.name}`)
         itemsList = response.data.results
       })
       .catch(err => {
         spinner.fail('Error while downloading content')
-        this.error(err, {exit: 1})
+        customSignal.fatal(err)
+        this.exit(1)
       })
+    customSignal.terraforming('Start terraforming in destination folder')
     terraForm(selectedChannel, itemsList, destFolder)
   }
 }

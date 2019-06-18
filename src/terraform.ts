@@ -6,7 +6,7 @@ import * as prepare from './prepare'
 import * as write from './write'
 import Config from './config'
 import slugify = require('@sindresorhus/slugify')
-
+import {customSignal} from './logging'
 /**
  * With a channel list and all items depending atteched to it (on its children) build a directory of .md files
  * with a proper folder structure and filename pattern according to user config
@@ -15,14 +15,14 @@ import slugify = require('@sindresorhus/slugify')
  * @param items : List of items attached to this channel and its children
  * @param parentPath : Parent directory to write files and dir in
  */
-export function terraForm(channel: Channel, items: any[], parentPath: string): void {
+export function terraForm(channel: Channel, items: any[], parentPath: string):void {
   let indentation = '   '.repeat(channel.level)
   let channelslug = slugify(channel.name)
   let currentFolder = path.join(parentPath, channelslug)
 
   write.createFolder(currentFolder)
     .then(() => {
-      console.log(`✅ ${indentation} 📁 ${slugify(channel.name)}`)
+      customSignal.success(`${indentation} 📁 ${slugify(channel.name)}`)
       let directItems = _.filter(items, item => {
         if (item.channels && item.channels.length > 0) {
           return item.channels.includes(channel.id)
@@ -31,15 +31,18 @@ export function terraForm(channel: Channel, items: any[], parentPath: string): v
       directItems.forEach(element => {
         let cargo = prepare.fileCargo(channel, element)
         let fullFilePath = prepare.fullFilePath(currentFolder, element, Config)
-        write.createFile(fullFilePath, cargo).then(() => {
-          console.log(`✅ ${indentation} 📄 ${currentFolder} ${prepare.filename(element, Config)}`)
-        }).catch(error => {
-          console.log('Could not create file : ' + error)
-        })
+        // We write synchronously to have a nice indented terminal output for user so, yes, trading UX for speed.
+        // TODO : Build a report object from async calls to have best of both world.
+        try {
+          write.createFile(fullFilePath, cargo)
+          customSignal.success(`${indentation} 📄 ${currentFolder} ${prepare.filename(element, Config)}`)
+        } catch (error) {
+          customSignal.fatal(error)
+        }
       })
     })
     .catch(error => {
-      console.error('Could not create channel folder : ' + error)
+      customSignal.fatal(error)
     })
   //if (channel.children.length === 0) { return }
   channel.children.forEach(child => {
