@@ -23,7 +23,7 @@ export function terraForm(channel: Channel, items: any[], parentPath: string):vo
 
   write.createFolder(currentFolder)
     .then(() => {
-      customSignal.success(`📁 ${currentFolder}`)
+      customSignal.created(`📁 ${currentFolder}`)
       let directItems = _.filter(items, item => {
         if (item.channels && item.channels.length > 0) {
           return item.channels.includes(channel.id)
@@ -36,7 +36,7 @@ export function terraForm(channel: Channel, items: any[], parentPath: string):vo
         // TODO : Build a report object from async calls to have best of both world.
         try {
           write.createFile(fullFilePath, cargo)
-          customSignal.success(`📄 ${chalk.gray(currentFolder)}/${prepare.filename(element, Config)}`)
+          customSignal.created(`📄 ${chalk.gray(currentFolder)}/${prepare.filename(element, Config)}`)
         } catch (error) {
           customSignal.fatal(error)
         }

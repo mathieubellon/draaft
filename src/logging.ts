@@ -8,16 +8,22 @@ const options = {
   secrets: [],
   stream: process.stdout,
   types: {
-    update: {
-      badge: '♻',
+    created: {
+      badge: '✔',
       color: 'green',
+      label: 'created',
+      logLevel: 'info'
+    },
+    updated: {
+      badge: '♻',
+      color: 'yellow',
       label: 'updated',
       logLevel: 'info'
     },
     terraforming: {
       badge: '🏗',
       color: 'blue',
-      label: 'terraforming',
+      label: 'builbing',
       logLevel: 'info'
     }
   }

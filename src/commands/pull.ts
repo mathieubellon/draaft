@@ -66,7 +66,7 @@ export default class Pull extends Command {
     const itemsURL = getUrl('items', config, qs)
     await this.$axios.get(itemsURL)
       .then(function (response: any) {
-        spinner.succeed(`${response.data.count} Content items successfully downloaded from channel ${chalk.magentaBright(selectedChannel.name)}`)
+        spinner.succeed(`${response.data.count} Content items successfully downloaded from channel ${chalk.magentaBright(selectedChannel.name)} to ${chalk.yellowBright(destFolder)}`)
         itemsList = response.data.results
       })
       .catch(err => {
@@ -74,7 +74,7 @@ export default class Pull extends Command {
         customSignal.fatal(err)
         this.exit(1)
       })
-    customSignal.terraforming(chalk.blue('Start terraforming in destination folder'))
+    customSignal.terraforming(chalk.blue('Terraform in destination folder'))
     terraForm(selectedChannel, itemsList, destFolder)
   }
 }
