@@ -2,6 +2,7 @@
 import Command, { flags } from '@oclif/command'
 import * as Conf from 'conf'
 import axios from 'axios'
+import * as ora from 'ora'
 
 const config = new Conf({
   projectName: 'draaft',
@@ -16,6 +17,7 @@ export default abstract class extends Command {
   // }
   token: string
   $axios: any
+  spinner: any
 
   async init() {
     let API_TOKEN = ''
@@ -35,6 +37,7 @@ export default abstract class extends Command {
         Authorization: `Token ${API_TOKEN}`
       }
     })
+    this.spinner = ora()
   }
 
   getToken(key: string) {

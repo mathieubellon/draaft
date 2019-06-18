@@ -3,11 +3,12 @@ import * as inquirer from 'inquirer'
 
 import * as path from 'path'
 import * as write from '../write'
+import { askChannels } from '../prompts'
 
-import * as ora from 'ora'
+
 import Command from '../base'
 import { flags } from '@oclif/command'
-import { getChannels, getItems } from '../fetch'
+import { getUrl } from '../fetch'
 import * as querystring from 'querystring'
 import * as url from 'url'
 
@@ -30,64 +31,48 @@ export default class Pull extends Command {
   static args = [{ name: 'file' }]
 
   async run() {
-    let allChannels: Channel[] = []
+    const spinner = this.spinner
+    let channelsList: Channel[] = []
+    let itemsList: any[] = []
     // Get channels list
-    let urlstring = url.format({
-      protocol: config.apiScheme,
-      host: config.apiHost,
-      pathname: config.apiEndpointChannels,
-    })
-    const myURL = new URL(urlstring)
-    
-    await this.$axios.get(myURL.href).then(function (response: any) {
-        response.data.forEach((channel: any) => {
-          allChannels.push(channel)
-        })
-        // TODO cache response on file for further use downstream
-        return allChannels
+
+    const channelsURL = getUrl('channels', config)
+    await this.$axios.get(channelsURL)
+      .then(function (response: any) {
+        channelsList = response.data
       })
       .catch(function (error: any) {
         console.error(error)
       })
-    // Ask user which channel to pull content from
-    // First Create a proper array of questions for CLI prompt
-    let promptChoices = _.map(allChannels, elt => {
-      return {
-        name: elt.hierarchy,
-        value: elt.id
-      }
-    })
-    let responses: any = await inquirer.prompt([{
-      name: 'channel',
-      message: 'Select a channel to pull content from\n',
-      type: 'list',
-      choices: promptChoices,
-    }])
+
+    let pickedChannel:any = await askChannels(channelsList)
 
     // Get selected channel and children
-    const selectedChannel: Channel|undefined = _.find(allChannels, { id: responses.channel })
+    const selectedChannel: Channel | undefined = _.find(channelsList, { id: pickedChannel.channel })
     if (!selectedChannel) { return }
 
     // TODO Better path selection (with autocomplete) + let user input its top content folder name
     let destFolder = path.join(process.cwd(), 'content')
-    console.log('Top destination folder : ' + destFolder)
     // Create top folder ro place all content in. Create if not exists.
-    write.createFolder(destFolder).then(() => {
-      const spinner = ora({ color: 'yellow', text: `Downloading content for channel ${selectedChannel.name}` }).start()
-      let qs = { channels: selectedChannel.id }
-      getItems(Config, qs)
-        .then(function (response: any) {
-          spinner.succeed(`${response.data.count} Content items successfully downloaded`)
-          let allItems: any[] = response.data.results
-          terraForm(selectedChannel, allItems, destFolder)
-        })
-        .catch(function (error: any) {
-          spinner.fail('Error while downloading content')
-          console.error(error)
-        })
-    })
-      .catch(error => {
-        console.error('Could not create top content folder', error)
+    await write.createFolder(destFolder)
+      .then(() => {
+        console.log(`Dest folder ${destFolder} created`)
       })
+      .catch(error => {
+        console.error(`Error while attempting to create dest folder ${destFolder}`, error)
+      })
+    spinner.start(`Downloading content for channel ${selectedChannel.name}`)
+    let qs = { channels: selectedChannel.id }
+    const itemsURL = getUrl('items', config, qs)
+    await this.$axios.get(itemsURL)
+      .then(function (response: any) {
+        spinner.succeed(`${response.data.count} Content items successfully downloaded`)
+        itemsList = response.data.results
+      })
+      .catch(function (error: any) {
+        spinner.fail('Error while downloading content')
+        console.error(error)
+      })
+    terraForm(selectedChannel, itemsList, destFolder)
   }
 }
