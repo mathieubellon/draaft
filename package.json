@@ -1,7 +1,7 @@
 {
     "name": "draaft-cli",
     "description": "Draaft cli to extract to local dir content as md files",
-    "version": "0.0.0",
+    "version": "0.0.1",
     "author": "Matthieu Bellon @matthieubellon",
     "bin": {
         "draaft": "./bin/run"

@@ -20,7 +20,7 @@ $ npm install -g draaft-cli
 $ draaft COMMAND
 running command...
 $ draaft (-v|--version|version)
-draaft-cli/0.0.0 darwin-x64 node-v12.4.0
+draaft-cli/0.0.1 darwin-x64 node-v12.4.0
 $ draaft --help [COMMAND]
 USAGE
   $ draaft COMMAND
@@ -29,24 +29,8 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`draaft pull [FILE]`](#pull-channels-file)
 * [`draaft help [COMMAND]`](#draaft-help-command)
-
-## `draaft pull [FILE]`
-
-describe the command here
-
-```
-USAGE
-  $ draaft pull [FILE]
-
-OPTIONS
-  -f, --force
-  -h, --help       show CLI help
-  -n, --name=name  name to print
-```
-
-_See code: [src/commands/pull.ts](https://github.com/draaft/cli/blob/v0.0.0/src/commands/pull.ts)_
+* [`draaft pull [FILE]`](#draaft-pull-file)
 
 ## `draaft help [COMMAND]`
 
@@ -64,4 +48,22 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v2.2.0/src/commands/help.ts)_
+
+## `draaft pull [FILE]`
+
+Pull content from a platform channel. Build in destination folder acording to selected layout (only hugo.io at the moment)
+
+```
+USAGE
+  $ draaft pull [FILE]
+
+OPTIONS
+  -e, --excludeTopFolder  [default: hugo] Whether or not create a folder for the top directory
+  -h, --help              show CLI help
+  -o, --overwrite         [default: false] If destination folder exists empty it before building
+  --channel=channel       Channel to pull content from [int]
+  --ssg=hugo|gatsby       [default: hugo] Your static site generator.
+```
+
+_See code: [src/commands/pull.ts](https://github.com/draaft/cli/blob/v0.0.1/src/commands/pull.ts)_
 <!-- commandsstop -->
