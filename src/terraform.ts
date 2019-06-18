@@ -7,6 +7,7 @@ import * as write from './write'
 import Config from './config'
 import slugify = require('@sindresorhus/slugify')
 import {customSignal} from './logging'
+const chalk = require('chalk');
 /**
  * With a channel list and all items depending atteched to it (on its children) build a directory of .md files
  * with a proper folder structure and filename pattern according to user config
@@ -16,13 +17,13 @@ import {customSignal} from './logging'
  * @param parentPath : Parent directory to write files and dir in
  */
 export function terraForm(channel: Channel, items: any[], parentPath: string):void {
-  let indentation = '   '.repeat(channel.level)
+
   let channelslug = slugify(channel.name)
   let currentFolder = path.join(parentPath, channelslug)
 
   write.createFolder(currentFolder)
     .then(() => {
-      customSignal.success(`${indentation} 📁 ${slugify(channel.name)}`)
+      customSignal.success(`📁 ${currentFolder}`)
       let directItems = _.filter(items, item => {
         if (item.channels && item.channels.length > 0) {
           return item.channels.includes(channel.id)
@@ -35,7 +36,7 @@ export function terraForm(channel: Channel, items: any[], parentPath: string):vo
         // TODO : Build a report object from async calls to have best of both world.
         try {
           write.createFile(fullFilePath, cargo)
-          customSignal.success(`${indentation} 📄 ${currentFolder} ${prepare.filename(element, Config)}`)
+          customSignal.success(`📄 ${chalk.gray(currentFolder)}/${prepare.filename(element, Config)}`)
         } catch (error) {
           customSignal.fatal(error)
         }

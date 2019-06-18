@@ -1,4 +1,4 @@
-import {askChannels} from '../prompts'
+import {askChannels, askDestDir} from '../prompts'
 import {Channel} from '../types'
 import {flags} from '@oclif/command'
 import {getUrl} from '../fetch'
@@ -9,6 +9,7 @@ import * as write from '../write'
 import Command from '../base'
 import config from '../config'
 import { customSignal } from "../logging";
+const chalk = require('chalk')
 
 export default class Pull extends Command {
   static description = 'describe the command here'
@@ -27,6 +28,9 @@ export default class Pull extends Command {
     let spinner = this.spinner
     let channelsList: Channel[] = []
     let itemsList: any[] = []
+
+    let destFolderAnswer: any = await askDestDir()
+    let destFolder = destFolderAnswer.path
     
     // Get channels list
     spinner.start(`Get channels list`)
@@ -47,8 +51,6 @@ export default class Pull extends Command {
     const selectedChannel: Channel | undefined = _.find(channelsList, { id: pickedChannel.channel })
     if (!selectedChannel) { return }
 
-    // TODO Better path selection (with autocomplete) + let user input its top content folder name
-    let destFolder = path.join(process.cwd(), 'content')
     // Create top folder ro place all content in. Create if not exists.
     spinner.start(`Checking destination folder ${destFolder}`)
     await write.createFolder(destFolder)
@@ -64,7 +66,7 @@ export default class Pull extends Command {
     const itemsURL = getUrl('items', config, qs)
     await this.$axios.get(itemsURL)
       .then(function (response: any) {
-        spinner.succeed(`${response.data.count} Content items successfully downloaded from ${selectedChannel.name}`)
+        spinner.succeed(`${response.data.count} Content items successfully downloaded from channel ${chalk.magentaBright(selectedChannel.name)}`)
         itemsList = response.data.results
       })
       .catch(err => {
@@ -72,7 +74,7 @@ export default class Pull extends Command {
         customSignal.fatal(err)
         this.exit(1)
       })
-    customSignal.terraforming('Start terraforming in destination folder')
+    customSignal.terraforming(chalk.blue('Start terraforming in destination folder'))
     terraForm(selectedChannel, itemsList, destFolder)
   }
 }
