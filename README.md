@@ -1,9 +1,9 @@
 draaft-cli
 ==========
 
-[Pilot](https://pilot.pm) is a content production platform for marketing or communication teams. Draaft is a command line tool that simply allows you to retrieve the content produced on Pilot for static site generators. 
+Draaft is a command line tool that simply allows you to retrieve content produced on Pilot for statics sites generators. [Pilot](https://pilot.pm) is a content production platform for marketing or communication teams.  
 
-🚨 ⚠ **This cli is absolutely not production ready and API is subject to changes** ⚠
+🚨 ⚠ **Alpha version : This cli is absolutely not production ready and API is subject to changes** ⚠
 
 <!-- [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/draaft-cli.svg)](https://npmjs.org/package/draaft-cli)
