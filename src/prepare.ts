@@ -1,6 +1,7 @@
 import * as matter from 'gray-matter'
 import * as slugify from '@sindresorhus/slugify'
 import * as _ from 'lodash'
+import * as fs from 'fs-extra'
 
 import { DraaftConfiguration } from './types'
 
@@ -62,8 +63,24 @@ export function fullFilePath(inFolder: string, document: any, options: DraaftCon
  * @param document : Draaft document returned by Api
  */
 export function fileCargo(channel: any, document: any): string {
+
   let bodymarkdown = ''
   let newdoc = _.cloneDeep(document)
+
+  // Check if type frontmapper exists
+  const typemapp = JSON.parse(fs.readFileSync('.draaft/type614.json', 'utf8'))
+
+  console.log(typemapp)
+
+  typemapp.mapper.forEach((element: any) => {
+    if (element.name !== element.frontmatter) {
+      console.log(element)
+      _.set(newdoc, element.frontmapper, document[element.name])
+      _.unset(newdoc, element.name)
+    }
+  })
+
+
   delete newdoc.channels
   //document.menu = channel.name
   newdoc.channel = channel.name

@@ -12,9 +12,16 @@ export default class Types extends BaseCommand {
     showcargo: flags.boolean({char: 's', description: 'Display content schema for each type'}),
   }
 
+  static args = [
+    {name: 'id', description: 'ID of type', required: false}
+  ]
+
   async run() {
-    const {flags} = this.parse(Types)
+    const {flags, args} = this.parse(Types)
     // Get content types list
+    if(args.id){
+      console.log(args.id)
+    }
     let typesList = []
     try {
       this.spinner.start('Get content types list')
