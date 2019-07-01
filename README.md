@@ -5,11 +5,11 @@ draaft-cli
 
 🚨 ⚠ **This cli is absolutely not production ready and API is subject to changes** ⚠
 
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
+<!-- [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/draaft-cli.svg)](https://npmjs.org/package/draaft-cli)
 [![CircleCI](https://circleci.com/gh/draaft/cli/tree/master.svg?style=shield)](https://circleci.com/gh/draaft/cli/tree/master)
 [![Downloads/week](https://img.shields.io/npm/dw/draaft-cli.svg)](https://npmjs.org/package/draaft-cli)
-[![License](https://img.shields.io/npm/l/draaft-cli.svg)](https://github.com/draaft/cli/blob/master/package.json)
+[![License](https://img.shields.io/npm/l/draaft-cli.svg)](https://github.com/draaft/cli/blob/master/package.json) -->
 
 <!-- toc -->
 * [Usage](#usage)
