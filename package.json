@@ -1,0 +1,80 @@
+{
+  "name": "draaft-cli",
+  "description": "A CLI to pull content from https://pilot.pm content collaboration platform and feed your static site generator with markdown files",
+  "version": "0.0.1",
+  "author": "Matthieu Bellon @matthieubellon",
+  "bin": {
+    "draaft": "./bin/run"
+  },
+  "bugs": "https://github.com/draaft/cli/issues",
+  "dependencies": {
+    "@oclif/command": "^1",
+    "@oclif/config": "^1",
+    "@oclif/errors": "^1.2.2",
+    "@oclif/plugin-help": "^2",
+    "@sindresorhus/slugify": "^0.9.1",
+    "@types/fs-extra": "^7.0.0",
+    "@types/inquirer": "^6.0.3",
+    "axios": "^0.19.0",
+    "chalk": "^2.4.2",
+    "conf": "^4.1.0",
+    "ejs": "^2.6.2",
+    "fs-extra": "^8.0.1",
+    "gray-matter": "^4.0.2",
+    "inquirer": "^6.3.1",
+    "inquirer-fuzzy-path": "^2.0.3",
+    "lodash": "^4.17.11",
+    "ora": "^3.4.0",
+    "signale": "^1.4.0",
+    "tslib": "^1"
+  },
+  "devDependencies": {
+    "@oclif/dev-cli": "^1",
+    "@oclif/test": "^1",
+    "@oclif/tslint": "^3",
+    "@types/chai": "^4",
+    "@types/ejs": "^2.6.3",
+    "@types/mocha": "^5",
+    "@types/node": "^10",
+    "chai": "^4",
+    "globby": "^8",
+    "mocha": "^5",
+    "nyc": "^13",
+    "oclif": "^1.13.2",
+    "ts-node": "^8",
+    "tslint": "^5",
+    "typescript": "^3.3"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "files": [
+    "/bin",
+    "/lib",
+    "/npm-shrinkwrap.json",
+    "/oclif.manifest.json"
+  ],
+  "homepage": "https://github.com/draaft/cli",
+  "keywords": [
+    "oclif"
+  ],
+  "license": "MIT",
+  "main": "lib/index.js",
+  "oclif": {
+    "commands": "./lib/commands",
+    "bin": "draaft",
+    "dirname": ".draaft",
+    "plugins": [
+      "@oclif/plugin-help"
+    ]
+  },
+  "repository": "draaft/cli",
+  "scripts": {
+    "postpack": "rm -f oclif.manifest.json",
+    "posttest": "tslint -p test -t stylish",
+    "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+    "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
+    "version": "oclif-dev readme && git add README.md"
+  },
+  "types": "lib/index.d.ts"
+}
