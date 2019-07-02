@@ -24,16 +24,17 @@ export default class Types extends BaseCommand {
     let purgedType: any = {}
     purgedType.id = srcType.id
     purgedType.name = srcType.name
-    purgedType.content_schema = {}
+    purgedType.content_schema = []
 
     srcType.content_schema.forEach((element: any) => {
       let neovalue: any = {}
+      neovalue.name = element.name
       neovalue.fm_show = true
       neovalue.fm_key = element.name
       if (element.name === 'body') {
         neovalue.fm_show = false
       }
-      purgedType.content_schema[element.name] = neovalue
+      purgedType.content_schema.push(neovalue)
     })
     return purgedType
   }
@@ -50,7 +51,6 @@ export default class Types extends BaseCommand {
         this.spinner.succeed(`content type ${args.id} downloaded`)
         if (flags.save) {
           const CURR_DIR = process.cwd()
-          console.log()
           let json2write: any = {}
           json2write = this.purgeType(typesList[0])
           let writePath = path.join(CURR_DIR, '.draaft', `type-${json2write.id}.yml`)

@@ -1,7 +1,8 @@
 tasks:
     - Prepare for publishing https://hackernoon.com/how-to-publish-your-package-on-npm-7fc1f5aae600
     - Manage pagination
-    - type save config frontmapper
-    - read/parse frontmapper
+    - type save config frontmapper @done
+    - read/parse frontmapper @done
+    - order cargo
     - token in $USER_HOME ? (so we can version config file for types)
     - Cut top folder (pull option)

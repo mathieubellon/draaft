@@ -74,16 +74,14 @@ export function fileCargo(channel: any, document: any): string {
   if (fs.existsSync(typeFilePath)){
     let contents = fs.readFileSync(typeFilePath, 'utf8')
     const typemapp = yaml.safeLoad(contents)
-    _.forOwn(typemapp.content_schema, function (value, key) {
-      
-      if (key !== value.fm_key) {
-        newdoc.cargo[value.fm_key] = newdoc.cargo[key]
-        delete newdoc.cargo[key]
+    typemapp.content_schema.forEach((element: any) => {
+      if (element.name !== element.fm_key) {
+        newdoc.cargo[element.fm_key] = newdoc.cargo[element.name]
+        delete newdoc.cargo[element.name]
       }
-      if (!value.fm_show) {
-        delete newdoc.cargo[value.fm_key]
+      if (!element.fm_show) {
+        delete newdoc.cargo[element.fm_key]
       }
-
     })
   }
   delete newdoc.channels
