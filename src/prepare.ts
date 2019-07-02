@@ -85,13 +85,14 @@ export function fileCargo(channel: any, document: any): string {
     })
   }
   delete newdoc.channels
+  delete newdoc.targets
   //document.menu = channel.name
   newdoc.channel = channel.name
   // FIXME content field is maybe something else than body
-  if (document.cargo.body && document.cargo.body !== '') {
+  if (newdoc.cargo.body && newdoc.cargo.body !== '') {
     bodymarkdown = document.cargo.body
+    delete newdoc.cargo.body
   }
-  //delete newdoc.cargo
   delete newdoc.tags
   newdoc.tags = []
   document.tags.forEach((tag: any) => {

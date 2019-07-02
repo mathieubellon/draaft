@@ -6,3 +6,4 @@ tasks:
     - order cargo
     - token in $USER_HOME ? (so we can version config file for types)
     - Cut top folder (pull option)
+    - Body is not in fm by default and type file can override with "true".
