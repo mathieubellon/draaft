@@ -105,4 +105,21 @@ export default class DraaftAPI {
         return error
       })
   }
+
+  /**
+   * Get content type
+   * Info {@link https://www.draaft.io/documentation/api/pre-alpha/#types types}
+   * @param [callback] - Optional function to execute on completion
+   * @returns Returns a promise if [callback] is not defined
+   */
+  typesGetOne(id: number, query: any) {
+    const requestUrl = getUrl(`contenttypes/${id}`, this.config, query)
+    return this.httpclient.get(requestUrl)
+      .then((response: any) => {
+        return response.data
+      })
+      .catch((error: any) => {
+        return error
+      })
+  }
 }

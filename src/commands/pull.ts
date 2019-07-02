@@ -83,7 +83,7 @@ export default class Pull extends BaseCommand {
     // Get items list
     try {
       let qs = {channels: selectedChannel.id}
-      this.spinner.start(`Downloading content for channel ${selectedChannel.name}`)
+      this.spinner.start(`Downloading content for channel ${selectedChannel.name} (${selectedChannel.id})`)
       itemsList = await this.api.itemsGetAll(qs)
       this.spinner.succeed('Items list downloaded')
     } catch (error) {
@@ -91,7 +91,7 @@ export default class Pull extends BaseCommand {
       customSignal.fatal(error)
       this.exit(1)
     }
-
+    // Write to disk
     customSignal.terraforming(chalk.blue('Creating your files in destination folder'))
     terraForm(selectedChannel, itemsList, destFolder, this.configuration)
   }

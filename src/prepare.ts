@@ -2,7 +2,7 @@ import * as matter from 'gray-matter'
 import * as slugify from '@sindresorhus/slugify'
 import * as _ from 'lodash'
 import * as fs from 'fs-extra'
-
+import * as yaml from 'js-yaml'
 import { DraaftConfiguration } from './types'
 
 /**
@@ -67,20 +67,25 @@ export function fileCargo(channel: any, document: any): string {
   let bodymarkdown = ''
   let newdoc = _.cloneDeep(document)
 
-  // Check if type frontmapper exists
-  const typemapp = JSON.parse(fs.readFileSync('.draaft/type614.json', 'utf8'))
+  let typeID: number = newdoc.item_type
+  let typeFilePath = `.draaft/type-${typeID}.yml`
+  
+  // Check if type file exists
+  if (fs.existsSync(typeFilePath)){
+    let contents = fs.readFileSync(typeFilePath, 'utf8')
+    const typemapp = yaml.safeLoad(contents)
+    _.forOwn(typemapp.content_schema, function (value, key) {
+      
+      if (key !== value.fm_key) {
+        newdoc.cargo[value.fm_key] = newdoc.cargo[key]
+        delete newdoc.cargo[key]
+      }
+      if (!value.fm_show) {
+        delete newdoc.cargo[value.fm_key]
+      }
 
-  console.log(typemapp)
-
-  typemapp.mapper.forEach((element: any) => {
-    if (element.name !== element.frontmatter) {
-      console.log(element)
-      _.set(newdoc, element.frontmapper, document[element.name])
-      _.unset(newdoc, element.name)
-    }
-  })
-
-
+    })
+  }
   delete newdoc.channels
   //document.menu = channel.name
   newdoc.channel = channel.name
@@ -88,7 +93,7 @@ export function fileCargo(channel: any, document: any): string {
   if (document.cargo.body && document.cargo.body !== '') {
     bodymarkdown = document.cargo.body
   }
-  delete newdoc.cargo
+  //delete newdoc.cargo
   delete newdoc.tags
   newdoc.tags = []
   document.tags.forEach((tag: any) => {
