@@ -26,17 +26,17 @@ export default class Types extends BaseCommand {
     let purgedType: any = {}
     purgedType.id = srcType.id
     purgedType.name = srcType.name
-    purgedType.content_schema = []
+    purgedType.content_schema = {}
 
     srcType.content_schema.forEach((element: any) => {
       let neovalue: any = {}
-      neovalue.name = element.name
+
       neovalue.fm_show = true
       neovalue.fm_key = element.name
       if (element.name === 'body') {
         neovalue.fm_show = false
       }
-      purgedType.content_schema.push(neovalue)
+      purgedType.content_schema[element.name] = neovalue
     })
     return purgedType
   }

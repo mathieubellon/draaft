@@ -75,7 +75,6 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
         delete frontmatter.cargo[key]
       }
     }
-
   }
   return frontmatter
 }
