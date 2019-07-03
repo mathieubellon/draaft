@@ -1,15 +1,16 @@
-
-import {Channel, DraaftConfiguration} from './types'
 import * as _ from 'lodash'
+import * as matter from 'gray-matter'
 import * as path from 'path'
 import * as prepare from './prepare'
 import * as write from './write'
+
+import { Channel, DraaftConfiguration } from './types'
+
+import { CLIError } from '@oclif/errors'
+import { ensureDirSync } from 'fs-extra'
+import { signal } from './signal'
 import slugify = require('@sindresorhus/slugify')
-import {signal} from './signal'
 const chalk = require('chalk')
-import * as matter from 'gray-matter'
-import {ensureDirSync} from 'fs-extra'
-import {CLIError} from '@oclif/errors'
 
 /**
  * With a channel list and all items depending atteched to it (on its children) build a directory of .md files
@@ -60,7 +61,7 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
     // TODO : Build a report object from async calls to have best of both world.
     try {
       write.createFile(fullFilePath, cargo)
-      signal.created(`📄 ${chalk.gray(currentFolder)}/${prepare.filename(element, config)}`)
+      signal.created(`📄 ${chalk.gray(fullFilePath)}`)
     } catch (error) {
       signal.fatal(error)
       throw new CLIError(error)

@@ -1,31 +1,11 @@
-import * as matter from 'gray-matter'
-import * as slugify from '@sindresorhus/slugify'
 import * as _ from 'lodash'
 import * as fs from 'fs-extra'
+import * as matter from 'gray-matter'
+import * as slugify from '@sindresorhus/slugify'
 import * as yaml from 'js-yaml'
+
 import { DraaftConfiguration } from './types'
 import { signal } from './signal';
-
-/**
- * Prepare filename depending on user decision while configurin hugo (mainly i18n related)
- * filename.md OR filename.en.md
- *
- * @param document : Draaft document returned by Api
- * @param options : Extension configuration object
- */
-export function filename(document: any, options: DraaftConfiguration): string {
-  let buildedFileName = document.title ? slugify(document.title) : `notitle-${document.id}`
-  // Append correct extension
-  if (options.i18nActivated && options.i18nContentLayout === 'byfilename' && document.language) {
-    let languageCode = document.language.split('_')[0] // fr_FR -> fr
-    buildedFileName = buildedFileName + '.' + languageCode + '.md'
-  } else {
-    // Content language can be set by folder structure or front matter property
-    // so leave filemane agnostic
-    buildedFileName = buildedFileName + '.md'
-  }
-  return buildedFileName
-}
 
 /**
  * Build a filepath for content according to Hugo io local config (i18n)
@@ -82,6 +62,10 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
         delete frontmatter.cargo[oldKey]
       }
     }
+  } else {
+    if (frontmatter.cargo.body) {
+      delete frontmatter.cargo.body
+    }
   }
   return frontmatter
 }
@@ -93,11 +77,11 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
  * @param document : Draaft document returned by Api
  */
 export function fileContent(channel: any, document: any): string {
-  
+
   // Everything from document is in frontmatter (for now, may be updated downwards)
   let frontmatter = _.cloneDeep(document)
   let markdown = ''
-  
+
 
   // If we have a body in content use it for markdown source
   if (document.cargo.body && document.cargo.body !== '') {
@@ -105,19 +89,18 @@ export function fileContent(channel: any, document: any): string {
   }
 
   // Do we have a local content schema ?
-  let typeFilePath = `.draaft/type-${ frontmatter.item_type }.yml`
+  let typeFilePath = `.draaft/type-${frontmatter.item_type}.yml`
   let typefile: any
   if (fs.existsSync(typeFilePath)) {
     typefile = yaml.safeLoad(fs.readFileSync(typeFilePath, 'utf8'))
   }
-  
+
   if (typefile && typefile.content_schema) {
     signal.success('Custom type file found, using it')
     customiseFrontmatter(frontmatter, typefile.content_schema)
   } else {
     customiseFrontmatter(frontmatter)
   }
-
 
   let cargoToWrite = matter.stringify(markdown, frontmatter)
   return cargoToWrite
