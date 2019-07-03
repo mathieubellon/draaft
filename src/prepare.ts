@@ -67,12 +67,19 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
   })
   frontmatter.tags = customTags
   // cargo body doit virer comme si schema en custom sauf si en schema c'est true
-  console.log(schema)
   if (schema) {
     // schema will only customise 'frontmatter.cargo' key, not frontmatter
     for (let key of Object.keys(frontmatter.cargo)) {
+      // Do not show in frontmatter
       if (schema[key].fm_show === false) {
         delete frontmatter.cargo[key]
+      }
+      // Rename key in frontmatter
+      if (key !== schema[key].fm_key) {
+        let newKey = schema[key].fm_key
+        let oldKey = key
+        frontmatter.cargo[newKey] = frontmatter.cargo[oldKey]
+        delete frontmatter.cargo[oldKey]
       }
     }
   }
