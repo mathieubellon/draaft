@@ -4,12 +4,20 @@ import * as _ from 'lodash'
 
 registerPrompt('fuzzypath', require('inquirer-fuzzy-path'))
 
+export const confirmAction = (confirmMessage = 'Are you sure ?') => {
+  return prompt({
+    type: 'confirm',
+    name: 'confirm',
+    message: confirmMessage
+  })
+}
+
 export const askToken = () => {
   return prompt({
     type: 'password',
     name: 'token',
     message: 'What is your token?',
-    mask: "*"
+    mask: '*'
   })
 }
 

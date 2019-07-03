@@ -5,6 +5,7 @@ const chalk = require('chalk')
 import * as fs from 'fs-extra'
 import * as path from 'path'
 import * as yaml from 'js-yaml'
+import { createFileSafe, createFile } from '../write';
 
 export default class Types extends BaseCommand {
   static description = 'List all content types'
@@ -12,8 +13,9 @@ export default class Types extends BaseCommand {
   static flags = {
     help: flags.help({char: 'h'}),
     // flag with no value (-f, --force)
-    withcargo: flags.boolean({char: 'w', description: 'Display content schema for each type'}),
+    schema: flags.boolean({char: 'w', description: 'Display content schema for each type'}),
     save: flags.boolean({char: 's', description: 'Save content shema as file for customisation'}),
+    backup: flags.boolean({char: 'b', description: 'If file exists create backup'}),
   }
 
   static args = [
@@ -39,6 +41,16 @@ export default class Types extends BaseCommand {
     return purgedType
   }
 
+  saveTypeToDisk(contentType: any, backup = false){
+    let yaml2write = yaml.safeDump(this.purgeType(contentType))
+    let writePath = path.join(process.cwd(), '.draaft', `type-${contentType.id}.yml`)
+    if (backup) {
+      createFileSafe(writePath, yaml2write)
+    } else {
+      createFile(writePath, yaml2write)
+    }
+  }
+
   async run() {
     const {flags, args} = this.parse(Types)
     let typesList = []
@@ -50,15 +62,7 @@ export default class Types extends BaseCommand {
         typesList.push(await this.api.typesGetOne(args.id))
         this.spinner.succeed(`content type ${args.id} downloaded`)
         if (flags.save) {
-          const CURR_DIR = process.cwd()
-          let json2write: any = {}
-          json2write = this.purgeType(typesList[0])
-          let writePath = path.join(CURR_DIR, '.draaft', `type-${json2write.id}.yml`)
-          try {
-            fs.writeFileSync(writePath, yaml.safeDump(json2write))
-          } catch (error) {
-            signal.fatal(error)
-          }
+          this.saveTypeToDisk(typesList[0], flags.backup)
         }
       } catch (error) {
         this.spinner.fail('Error while downloading content type')
@@ -70,12 +74,7 @@ export default class Types extends BaseCommand {
         this.spinner.start('Get content types list')
         typesList = await this.api.typesGetAll()
         this.spinner.succeed('content types list downloaded')
-        this.log(
-          'This list represents all content types created by the user'
-        )
-        this.log(
-          '==================='
-        )
+        this.log('This list represents all content types created by the user \n ===================')
       } catch (error) {
         this.spinner.fail('Error while downloading content types list')
         signal.fatal(error)
@@ -84,7 +83,7 @@ export default class Types extends BaseCommand {
     }
     typesList.forEach((type: any) => {
       this.log(`📐  ${type.name} [id:${type.id}]`)
-      if (flags.withcargo) {
+      if (flags.schema) {
         type.content_schema.forEach((field: any) => {
           let required = field.required ? 'required' : ''
           this.log(`    ${field.name} ${chalk.yellow(field.type)} ${chalk.gray(required)}`)
