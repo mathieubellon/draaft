@@ -70,11 +70,11 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
   if (schema) {
     // schema will only customise 'frontmatter.cargo' key, not frontmatter
     for (let key of Object.keys(frontmatter.cargo)) {
-      // Do not show in frontmatter
+      // Do not show in frontmatter.cargo
       if (schema[key].fm_show === false) {
         delete frontmatter.cargo[key]
       }
-      // Rename key in frontmatter
+      // Rename key in frontmatter.cargo
       if (key !== schema[key].fm_key) {
         let newKey = schema[key].fm_key
         let oldKey = key
