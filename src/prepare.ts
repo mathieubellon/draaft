@@ -77,11 +77,9 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
  * @param document : Draaft document returned by Api
  */
 export function fileContent(channel: any, document: any): string {
-
   // Everything from document is in frontmatter (for now, may be updated downwards)
   let frontmatter = _.cloneDeep(document)
   let markdown = ''
-
 
   // If we have a body in content use it for markdown source
   if (document.cargo.body && document.cargo.body !== '') {

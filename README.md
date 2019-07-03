@@ -135,10 +135,10 @@ _See code: [src/commands/types.ts](https://github.com/draaft/cli/blob/v0.0.1/src
 - [x] Get content from channel
 - [x] hugo.io : Create _index.file for sections
 - [x] generate basic Hugo layout
-- [ ] Data mapper : let user map Draaft response keys to Frontmatter (use Hugo archetype maybe)
+- [x] Data mapper : let user map Draaft response keys to Frontmatter (use Hugo archetype maybe)
+- [ ] Select which pilot.pm workflow state map with the "draft" frontmatter key in Hugo
 - [ ] Basic documentation
 ## Beta
-- [ ] Select which pilot.pm workflow state map with the "draft" frontmatter key in Hugo
 - [ ] Generate data files for complex layout (eg. home page)
 - [ ] Generate page bundles
 - [ ] Option : Flat layout (with frontmatter menu infos + hierarchy)
