@@ -4,6 +4,7 @@ import * as _ from 'lodash'
 import * as fs from 'fs-extra'
 import * as yaml from 'js-yaml'
 import { DraaftConfiguration } from './types'
+import { signal } from './signal';
 
 /**
  * Prepare filename depending on user decision while configurin hugo (mainly i18n related)
@@ -56,48 +57,62 @@ export function fullFilePath(inFolder: string, document: any, options: DraaftCon
   return buildedFilePath + '/' + buildedFileName
 }
 
+// Take a source content object as map it with local custom content schema
+function customiseFrontmatter(frontmatter: any, schema?: any): any {
+  delete frontmatter.channels
+  delete frontmatter.targets
+  let customTags: any[] = []
+  frontmatter.tags.forEach((tag: any) => {
+    customTags.push(tag.name)
+  })
+  frontmatter.tags = customTags
+  // cargo body doit virer comme si schema en custom sauf si en schema c'est true
+  console.log(schema)
+  if (schema) {
+    // schema will only customise 'frontmatter.cargo' key, not frontmatter
+    for (let key of Object.keys(frontmatter.cargo)) {
+      if (schema[key].fm_show === false) {
+        delete frontmatter.cargo[key]
+      }
+    }
+
+  }
+  return frontmatter
+}
+
 /**
  * Prepare file contents before writing it
  *
  * @param channel : Channel document is attached to
  * @param document : Draaft document returned by Api
  */
-export function fileCargo(channel: any, document: any): string {
-
-  let bodymarkdown = ''
-  let newdoc = _.cloneDeep(document)
-
-  let typeID: number = newdoc.item_type
-  let typeFilePath = `.draaft/type-${typeID}.yml`
+export function fileContent(channel: any, document: any): string {
   
-  // Check if type file exists
-  if (fs.existsSync(typeFilePath)){
-    let contents = fs.readFileSync(typeFilePath, 'utf8')
-    const typemapp = yaml.safeLoad(contents)
-    typemapp.content_schema.forEach((element: any) => {
-      if (element.name !== element.fm_key) {
-        newdoc.cargo[element.fm_key] = newdoc.cargo[element.name]
-        delete newdoc.cargo[element.name]
-      }
-      if (!element.fm_show) {
-        delete newdoc.cargo[element.fm_key]
-      }
-    })
+  // Everything from document is in frontmatter (for now, may be updated downwards)
+  let frontmatter = _.cloneDeep(document)
+  let markdown = ''
+  
+
+  // If we have a body in content use it for markdown source
+  if (document.cargo.body && document.cargo.body !== '') {
+    markdown = document.cargo.body
   }
-  delete newdoc.channels
-  delete newdoc.targets
-  //document.menu = channel.name
-  newdoc.channel = channel.name
-  // FIXME content field is maybe something else than body
-  if (newdoc.cargo.body && newdoc.cargo.body !== '') {
-    bodymarkdown = document.cargo.body
-    delete newdoc.cargo.body
+
+  // Do we have a local content schema ?
+  let typeFilePath = `.draaft/type-${ frontmatter.item_type }.yml`
+  let typefile: any
+  if (fs.existsSync(typeFilePath)) {
+    typefile = yaml.safeLoad(fs.readFileSync(typeFilePath, 'utf8'))
   }
-  delete newdoc.tags
-  newdoc.tags = []
-  document.tags.forEach((tag: any) => {
-    newdoc.tags.push(tag.name)
-  })
-  let cargoToWrite = matter.stringify(bodymarkdown, newdoc)
+  
+  if (typefile && typefile.content_schema) {
+    signal.success('Custom type file found, using it')
+    customiseFrontmatter(frontmatter, typefile.content_schema)
+  } else {
+    customiseFrontmatter(frontmatter)
+  }
+
+
+  let cargoToWrite = matter.stringify(markdown, frontmatter)
   return cargoToWrite
 }

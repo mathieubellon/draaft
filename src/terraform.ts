@@ -54,7 +54,7 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
   })
   // Write items for this folder
   directItems.forEach(element => {
-    let cargo = prepare.fileCargo(channel, element)
+    let cargo = prepare.fileContent(channel, element)
     let fullFilePath = prepare.fullFilePath(currentFolder, element, config)
     // We write synchronously to have a nice indented terminal output for user so, yes, trading speed for UX.
     // TODO : Build a report object from async calls to have best of both world.
