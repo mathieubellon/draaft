@@ -29,4 +29,4 @@ const options = {
   }
 }
 
-export const customSignal = new Signale(options)
+export const signal = new Signale(options)

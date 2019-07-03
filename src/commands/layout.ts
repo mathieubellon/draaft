@@ -1,7 +1,7 @@
 import {Command, flags} from '@oclif/command'
 import * as fs from 'fs'
 import * as path from 'path'
-import {customSignal} from '../logging'
+import {signal} from '../signal'
 import {ensureDirSync} from 'fs-extra'
 import {CLIError} from '@oclif/errors'
 
@@ -32,17 +32,17 @@ export default class Layout extends Command {
           const writePath = `${CURR_DIR}/${file}`
           try {
             fs.writeFileSync(writePath, contents, 'utf8')
-            customSignal.created(`📄 ${writePath}`)
+            signal.created(`📄 ${writePath}`)
           } catch (error) {
-            customSignal.fatal(error)
+            signal.fatal(error)
             throw new CLIError(error)
           }
         } else if (stats.isDirectory()) {
           try {
             ensureDirSync(`${CURR_DIR}/${file}`)
-            customSignal.created(`📁 ${CURR_DIR}/${file}`)
+            signal.created(`📁 ${CURR_DIR}/${file}`)
           } catch (error) {
-            customSignal.fatal(error)
+            signal.fatal(error)
             throw new CLIError(error)
           }
           // recursive call

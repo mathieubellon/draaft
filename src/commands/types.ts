@@ -1,6 +1,6 @@
 import { flags } from '@oclif/command'
 import { BaseCommand } from '../base'
-import { customSignal } from '../logging'
+import { signal } from '../signal'
 const chalk = require('chalk')
 import * as fs from 'fs-extra'
 import * as path from 'path'
@@ -54,16 +54,15 @@ export default class Types extends BaseCommand {
           let json2write: any = {}
           json2write = this.purgeType(typesList[0])
           let writePath = path.join(CURR_DIR, '.draaft', `type-${json2write.id}.yml`)
-          console.log(writePath)
           try {
             fs.writeFileSync(writePath, yaml.safeDump(json2write))
           } catch (error) {
-            customSignal.fatal(error)
+            signal.fatal(error)
           }
         }
       } catch (error) {
         this.spinner.fail('Error while downloading content type')
-        customSignal.fatal(error)
+        signal.fatal(error)
         this.exit(1)
       }
     } else {
@@ -79,7 +78,7 @@ export default class Types extends BaseCommand {
         )
       } catch (error) {
         this.spinner.fail('Error while downloading content types list')
-        customSignal.fatal(error)
+        signal.fatal(error)
         this.exit(1)
       }
     }

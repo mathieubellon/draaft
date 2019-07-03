@@ -5,7 +5,7 @@ import * as path from 'path'
 import * as prepare from './prepare'
 import * as write from './write'
 import slugify = require('@sindresorhus/slugify')
-import {customSignal} from './logging'
+import {signal} from './signal'
 const chalk = require('chalk')
 import * as matter from 'gray-matter'
 import {ensureDirSync} from 'fs-extra'
@@ -26,9 +26,9 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
   // Create section folder
   try {
     ensureDirSync(currentFolder)
-    customSignal.created(`📁 ${currentFolder}`)
+    signal.created(`📁 ${currentFolder}`)
   } catch (error) {
-    customSignal.fatal(`📁 ${currentFolder} not created`)
+    signal.fatal(`📁 ${currentFolder} not created`)
     throw new CLIError(error)
   }
   // Create _index.md file for folder
@@ -41,9 +41,9 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
     }
     let indexContent = matter.stringify(String(frontmatter.description), frontmatter)
     write.createFile(path.join(currentFolder, '_index.md'), indexContent)
-    customSignal.created(`📄 ${chalk.gray(currentFolder)}/_index.md`)
+    signal.created(`📄 ${chalk.gray(currentFolder)}/_index.md`)
   } catch (error) {
-    customSignal.fatal(error)
+    signal.fatal(error)
     throw new CLIError(error)
   }
   // Filter items for this channel
@@ -60,9 +60,9 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
     // TODO : Build a report object from async calls to have best of both world.
     try {
       write.createFile(fullFilePath, cargo)
-      customSignal.created(`📄 ${chalk.gray(currentFolder)}/${prepare.filename(element, config)}`)
+      signal.created(`📄 ${chalk.gray(currentFolder)}/${prepare.filename(element, config)}`)
     } catch (error) {
-      customSignal.fatal(error)
+      signal.fatal(error)
       throw new CLIError(error)
     }
   })

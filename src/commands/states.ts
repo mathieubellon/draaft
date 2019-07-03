@@ -1,5 +1,5 @@
 import { flags } from '@oclif/command'
-import { customSignal } from '../logging'
+import { signal } from '../signal'
 import { BaseCommand } from '../base'
 import * as yaml from 'js-yaml'
 import * as path from 'path'
@@ -34,7 +34,7 @@ export default class States extends BaseCommand {
       )
     } catch (error) {
       this.spinner.fail('Error while downloading workflow states list')
-      customSignal.fatal(error)
+      signal.fatal(error)
       this.exit(1)
     }
     statesList.forEach((state: any) => {
@@ -49,7 +49,7 @@ export default class States extends BaseCommand {
       try {
         fs.writeFileSync(writePath, yaml.safeDump(statesList))
       } catch (error) {
-        customSignal.fatal(error)
+        signal.fatal(error)
       }
     }
   }

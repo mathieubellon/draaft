@@ -4,7 +4,7 @@ import {askChannels, askDestDir} from '../prompts'
 
 import {Channel} from '../types'
 import {BaseCommand} from '../base'
-import {customSignal} from '../logging'
+import {signal} from '../signal'
 import {flags} from '@oclif/command'
 import {terraForm} from '../terraform'
 import {ensureDirSync, emptyDirSync} from 'fs-extra'
@@ -45,7 +45,7 @@ export default class Pull extends BaseCommand {
       this.spinner.succeed(`Destination folder exists ${chalk.blue(destFolder)}`)
     } catch (error) {
       this.spinner.fail(`Destination folder not created ${chalk.red(destFolder)}`)
-      customSignal.fatal(error)
+      signal.fatal(error)
       this.exit(1)
     }
 
@@ -55,7 +55,7 @@ export default class Pull extends BaseCommand {
         this.spinner.succeed(`All files deleted in destination folder ${chalk.blue(destFolder)}`)
       } catch (error) {
         this.spinner.fail(`Error while cleaning destination folder ${chalk.red(destFolder)}`)
-        customSignal.fatal(error)
+        signal.fatal(error)
         this.exit(1)
       }
     }
@@ -66,7 +66,7 @@ export default class Pull extends BaseCommand {
       this.spinner.succeed('Channels list downloaded')
     } catch (error) {
       this.spinner.fail('Error while downloading channels list')
-      customSignal.fatal(error)
+      signal.fatal(error)
       this.exit(1)
     }
     let pickedChannel: number
@@ -88,11 +88,11 @@ export default class Pull extends BaseCommand {
       this.spinner.succeed('Items list downloaded')
     } catch (error) {
       this.spinner.fail('Error while downloading items list')
-      customSignal.fatal(error)
+      signal.fatal(error)
       this.exit(1)
     }
     // Write to disk
-    customSignal.terraforming(chalk.blue('Creating your files in destination folder'))
+    signal.terraforming(chalk.blue('Creating your files in destination folder'))
     terraForm(selectedChannel, itemsList, destFolder, this.configuration)
   }
 }
