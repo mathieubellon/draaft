@@ -21,8 +21,8 @@ const chalk = require('chalk')
  * @param parentPath : Parent directory to write files and dir in
  */
 export function terraForm(channel: Channel, items: any[], parentPath: string, config: DraaftConfiguration): void {
-  let channelslug = slugify(channel.name)
-  let currentFolder = path.join(parentPath, channelslug)
+  let channelSlug = slugify(channel.name)
+  let currentFolder = path.join(parentPath, channelSlug)
 
   // Create section folder
   try {

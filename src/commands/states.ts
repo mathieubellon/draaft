@@ -20,7 +20,8 @@ export default class States extends BaseCommand {
     let statesList = []
     try {
       this.spinner.start('Get workflow states list')
-      statesList = await this.api.workflowGetAll()
+      let firstPage = await this.api.workflowGetAll()
+      statesList = firstPage.results
       this.spinner.succeed('Workflow states list downloaded')
       this.log('This list represents all workflow states created by the user \n ==========================')
     } catch (error) {

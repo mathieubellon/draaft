@@ -72,7 +72,8 @@ export default class Types extends BaseCommand {
     } else {
       try {
         this.spinner.start('Get content types list')
-        typesList = await this.api.typesGetAll()
+        let firstPage = await this.api.typesGetAll()
+        typesList = firstPage.results
         this.spinner.succeed('content types list downloaded')
         this.log('This list represents all content types created by the user \n ===================')
       } catch (error) {

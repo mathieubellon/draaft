@@ -61,8 +61,12 @@ export default class Pull extends BaseCommand {
     }
     // Get channels list
     try {
+      let qs = {
+        page_size: 100
+      }
       this.spinner.start('Get channels list')
-      channelsList = await this.api.channelsGetAll()
+      let firstPage = await this.api.channelsGetAll(qs)
+      channelsList = firstPage.results
       this.spinner.succeed('Channels list downloaded')
     } catch (error) {
       this.spinner.fail('Error while downloading channels list')
@@ -82,9 +86,13 @@ export default class Pull extends BaseCommand {
 
     // Get items list
     try {
-      let qs = {channels: selectedChannel.id}
+      let qs = {
+        channels: selectedChannel.id,
+        page_size: 100
+      }
       this.spinner.start(`Downloading content for channel ${selectedChannel.name} (${selectedChannel.id})`)
-      itemsList = await this.api.itemsGetAll(qs)
+      let firstPage = await this.api.itemsGetAll(qs)
+      itemsList = firstPage.results
       this.spinner.succeed('Items list downloaded')
     } catch (error) {
       this.spinner.fail('Error while downloading items list')

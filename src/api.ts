@@ -6,13 +6,13 @@ import * as path from 'path'
 import {DraaftConfiguration} from './types'
 
 function getUrl(endpoint: string, config: DraaftConfiguration, qsparams?: any): string {
-  let urlformatoptions: any = {
+  let urlFormatOptions: any = {
     protocol: config.apiScheme,
     host: config.apiHost,
   }
-  urlformatoptions.pathname = path.join(config.apiBasePath, endpoint)
-  let urlstring = url.format(urlformatoptions)
-  const myURL = new URL(urlstring)
+  urlFormatOptions.pathname = path.join(config.apiBasePath, endpoint)
+  let urlString = url.format(urlFormatOptions)
+  const myURL = new URL(urlString)
   if (qsparams) {
     myURL.search = querystring.stringify(qsparams)
   }
@@ -44,8 +44,8 @@ export default class DraaftAPI {
    * @param [callback] - Optional function to execute on completion
    * @returns - Returns a promise if [callback] is not defined
    */
-  async channelsGetAll() {
-    const requestUrl = getUrl('channels', this.config)
+  async channelsGetAll(query: any) {
+    const requestUrl = getUrl('channels', this.config, query)
     return this.httpclient.get(requestUrl)
       .then((response: any) => {
         return response.data
@@ -65,7 +65,7 @@ export default class DraaftAPI {
     const requestUrl = getUrl('items', this.config, query)
     return this.httpclient.get(requestUrl)
       .then((response: any) => {
-        return response.data.results
+        return response.data
       })
       .catch((error: any) => {
         return error
@@ -79,7 +79,7 @@ export default class DraaftAPI {
    * @returns Returns a promise if [callback] is not defined
    */
   workflowGetAll(query: any) {
-    const requestUrl = getUrl('workflowstates', this.config, query)
+    const requestUrl = getUrl('workflow_states', this.config, query)
     return this.httpclient.get(requestUrl)
       .then((response: any) => {
         return response.data
@@ -96,7 +96,7 @@ export default class DraaftAPI {
    * @returns Returns a promise if [callback] is not defined
    */
   typesGetAll(query: any) {
-    const requestUrl = getUrl('contenttypes', this.config, query)
+    const requestUrl = getUrl('item_types', this.config, query)
     return this.httpclient.get(requestUrl)
       .then((response: any) => {
         return response.data
@@ -113,7 +113,7 @@ export default class DraaftAPI {
    * @returns Returns a promise if [callback] is not defined
    */
   typesGetOne(id: number, query: any) {
-    const requestUrl = getUrl(`contenttypes/${id}`, this.config, query)
+    const requestUrl = getUrl(`item_types/${id}`, this.config, query)
     return this.httpclient.get(requestUrl)
       .then((response: any) => {
         return response.data
