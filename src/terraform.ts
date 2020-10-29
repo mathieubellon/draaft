@@ -12,6 +12,20 @@ import { signal } from './signal'
 import slugify = require('@sindresorhus/slugify')
 const chalk = require('chalk')
 
+function terraFormOneItem(channel: Channel, item: any, currentFolder: string, config: DraaftConfiguration){
+  let cargo = prepare.fileContent(channel, item)
+  let fullFilePath = prepare.fullFilePath(currentFolder, item, config)
+  // We write synchronously to have a nice indented terminal output for user so, yes, trading speed for UX.
+  // TODO : Build a report object from async calls to have best of both world.
+  try {
+    write.createFile(fullFilePath, cargo)
+    signal.created(`📄 ${chalk.gray(fullFilePath)}`)
+  } catch (error) {
+    signal.fatal(error)
+    throw new CLIError(error)
+  }
+}
+
 /**
  * With a channel list and all items depending atteched to it (on its children) build a directory of .md files
  * with a proper folder structure and filename pattern according to user config
@@ -32,6 +46,7 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
     signal.fatal(`📁 ${currentFolder} not created`)
     throw new CLIError(error)
   }
+
   // Create _index.md file for folder
   try {
     let frontmatter: any = _.cloneDeep(channel)
@@ -47,29 +62,24 @@ export function terraForm(channel: Channel, items: any[], parentPath: string, co
     signal.fatal(error)
     throw new CLIError(error)
   }
+
   // Filter items for this channel
   let directItems = _.filter(items, item => {
     if (item.channels && item.channels.length > 0) {
       return item.channels.includes(channel.id)
     }
   })
+
   // Write items for this folder
-  directItems.forEach(element => {
-    let cargo = prepare.fileContent(channel, element)
-    let fullFilePath = prepare.fullFilePath(currentFolder, element, config)
-    // We write synchronously to have a nice indented terminal output for user so, yes, trading speed for UX.
-    // TODO : Build a report object from async calls to have best of both world.
-    try {
-      write.createFile(fullFilePath, cargo)
-      signal.created(`📄 ${chalk.gray(fullFilePath)}`)
-    } catch (error) {
-      signal.fatal(error)
-      throw new CLIError(error)
-    }
-  })
-  if (channel.children.length > 0) {
-    channel.children.forEach(child => {
-      terraForm(child, items, currentFolder, config)
-    })
+  for( let item of directItems ){
+    terraFormOneItem(channel, item, currentFolder, config)
+    /*for( let translation of item.translations ){
+      terraFormOneItem(channel, translation, currentFolder, config)
+    }*/
+  }
+
+  // Recurse on sub channels
+  for( let subChannel of channel.children ){
+    terraForm(subChannel, items, currentFolder, config)
   }
 }

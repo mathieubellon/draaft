@@ -1,10 +1,13 @@
 *-debug.log
 *-error.log
 /.nyc_output
+/content
 /dist
 /lib
 /package-lock.json
 /tmp
-node_modules
+/layout
+/node_modules
+/static
 .envrc
 .editorconfig

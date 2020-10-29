@@ -67,23 +67,34 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
       delete frontmatter.cargo.body
     }
   }
+
+  // Translation key
+  // This is a master trad
+  if( frontmatter.translations.length ){
+    frontmatter.translationKey = frontmatter.id
+  }
+  // This is a translation, linked to a master trad
+  if (frontmatter.master_translation){
+    frontmatter.translationKey = frontmatter.master_translation
+  }
+
   return frontmatter
 }
 
 /**
  * Prepare file contents before writing it
  *
- * @param channel : Channel document is attached to
- * @param document : Draaft document returned by Api
+ * @param channel : Channel of the item
+ * @param item : Draaft item returned by Api
  */
-export function fileContent(channel: any, document: any): string {
+export function fileContent(channel: any, item: any): string {
   // Everything from document is in frontmatter (for now, may be updated downwards)
-  let frontmatter = _.cloneDeep(document)
+  let frontmatter = _.cloneDeep(item)
   let markdown = ''
 
   // If we have a body in content use it for markdown source
-  if (document.cargo.body && document.cargo.body !== '') {
-    markdown = document.cargo.body
+  if (item.cargo.body && item.cargo.body !== '') {
+    markdown = item.cargo.body
   }
 
   // Do we have a local content schema ?

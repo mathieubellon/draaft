@@ -87,7 +87,13 @@ export default class Pull extends BaseCommand {
     // Get items list
     try {
       let qs = {
+        // Filter on the current channel
         channels: selectedChannel.id,
+        // Exclude translations, they will be included in the master item.translations array
+        //master_translation: 'null',
+        // Expand the translation items
+        //expand: 'translations',
+        // increase page size to boost performances
         page_size: 100
       }
       this.spinner.start(`Downloading content for channel ${selectedChannel.name} (${selectedChannel.id})`)

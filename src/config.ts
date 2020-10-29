@@ -1,6 +1,6 @@
 import * as types from './types'
 
-const APIVERSION = 'pre-alpha'
+const APIVERSION = 'beta'
 const SCHEME = process.env.DRAAFTENV === 'production' ? 'https' : 'http'
 
 export const defaultconfiguration: types.DraaftConfiguration = {
