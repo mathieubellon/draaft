@@ -5,80 +5,103 @@ import * as _ from 'lodash'
 import * as path from 'path'
 import * as prepare from './prepare'
 import {signal} from './signal'
-import {Channel, DraaftConfiguration} from './types'
+import {Channel, ChannelHierarchy, DraaftConfiguration, Item} from './types'
 import * as write from './write'
 import slugify = require('@sindresorhus/slugify')
 
 const chalk = require('chalk')
 
-function terraFormOneItem(channel: Channel, item: any, currentFolder: string, config: DraaftConfiguration) {
-    let cargo = prepare.fileContent(channel, item)
-    let fullFilePath = prepare.fullFilePath(currentFolder, item, config)
-    // We write synchronously to have a nice indented terminal output for user so, yes, trading speed for UX.
-    // TODO : Build a report object from async calls to have best of both world.
+let itemFoldersMap: Record<number, string> = {}
+
+
+function createDir(dirPath: string){
     try {
-        write.createFile(fullFilePath, cargo)
-        signal.created(`📄 ${chalk.gray(fullFilePath)}`)
+        ensureDirSync(dirPath)
+        signal.created(`📁 ${dirPath}`)
+    } catch (error) {
+        signal.fatal(`📁 ${dirPath} not created`)
+        throw new CLIError(error)
+    }
+}
+
+function createContentFile(dirPath: string, fileName: string, content: string){
+    try {
+        write.createFile(path.join(dirPath, fileName), content)
+        signal.created(`📄 ${chalk.gray(dirPath)}${path.sep}${fileName}`)
     } catch (error) {
         signal.fatal(error)
         throw new CLIError(error)
     }
 }
 
-/**
- * With a channel list and all items depending atteched to it (on its children) build a directory of .md files
- * with a proper folder structure and filename pattern according to user config
- *
- * @param channel : Channel selected by user
- * @param items : List of items attached to this channel and its children
- * @param parentPath : Parent directory to write files and dir in
- */
-export function terraForm(channel: Channel, items: any[], parentPath: string, config: DraaftConfiguration): void {
+
+function writeChannelHierarchy(hierarchy: ChannelHierarchy, parentDirPath: string){
+    for( let node of hierarchy ){
+        if( node.type == 'folder' ){
+            let folderPath = path.join(parentDirPath, node.name)
+            createDir(folderPath)
+            let indexContent = matter.stringify(node.name, {title: node.name})
+            createContentFile(folderPath, '_index.md', indexContent)
+
+            writeChannelHierarchy(node.nodes, folderPath)
+        }
+
+        if( node.type == 'item' ){
+            itemFoldersMap[node.id] = parentDirPath
+        }
+    }
+}
+
+
+export function terraformChannel(channel: Channel, parentPath: string, config: DraaftConfiguration): void {
     let channelSlug = slugify(channel.name)
-    let currentFolder = path.join(parentPath, channelSlug)
+    let channelDirPath = path.join(parentPath, channelSlug)
 
     // Create section folder
-    try {
-        ensureDirSync(currentFolder)
-        signal.created(`📁 ${currentFolder}`)
-    } catch (error) {
-        signal.fatal(`📁 ${currentFolder} not created`)
-        throw new CLIError(error)
+    createDir(channelDirPath)
+
+    // Create _index.md file for channel root dir
+    let frontmatter: any = _.cloneDeep(channel)
+    if (config.ssg === 'hugo') {
+        frontmatter.title = channel.name
+        delete frontmatter.name
+        delete frontmatter.hierarchy
+        delete frontmatter.children
+    }
+    let indexContent = matter.stringify(String(frontmatter.description), frontmatter)
+    createContentFile(channelDirPath, '_index.md', indexContent)
+
+    writeChannelHierarchy(channel.hierarchy, channelDirPath)
+}
+
+
+function terraformOneItem(item: Item, config: DraaftConfiguration) {
+    let itemFolder = itemFoldersMap[item.id]
+    if( !itemFolder ){
+        throw `Item ${item.id} has no correspondence in the hierarchy`
     }
 
-    // Create _index.md file for folder
-    try {
-        let frontmatter: any = _.cloneDeep(channel)
-        if (config.ssg === 'hugo') {
-            frontmatter.title = channel.name
-            delete frontmatter.name
-            delete frontmatter.children
+    let dirPath = prepare.getItemDirPath(itemFolder, item, config)
+    let fileName = prepare.getItemFileName(item, config)
+    let content = prepare.fileContent(item)
+    createContentFile(dirPath, fileName, content)
+}
+
+/**
+ * With a channel list and all items depending attached to it (on its children) build a directory of .md files
+ * with a proper folder structure and filename pattern according to user config
+ *
+ * @param items : List of items attached to this channel
+ */
+export function terraformItems(items: Array<Item>, config: DraaftConfiguration): void {
+    // Currently we write synchronously to have a nice indented terminal output for user, trading speed for UX.
+    // TODO : Build a report object from async calls to have best of both world.
+    for (let item of items) {
+        terraformOneItem(item, config)
+        /*
+        for( let translation of item.translations ){
+          terraformOneItem(channel, translation, currentFolder, config)
         }
-        let indexContent = matter.stringify(String(frontmatter.description), frontmatter)
-        write.createFile(path.join(currentFolder, '_index.md'), indexContent)
-        signal.created(`📄 ${chalk.gray(currentFolder)}/_index.md`)
-    } catch (error) {
-        signal.fatal(error)
-        throw new CLIError(error)
-    }
-
-    // Filter items for this channel
-    let directItems = _.filter(items, item => {
-        if (item.channels && item.channels.length > 0) {
-            return item.channels.includes(channel.id)
-        }
-    })
-
-    // Write items for this folder
-    for (let item of directItems) {
-        terraFormOneItem(channel, item, currentFolder, config)
-        /*for( let translation of item.translations ){
-          terraFormOneItem(channel, translation, currentFolder, config)
-        }*/
-    }
-
-    // Recurse on sub channels
-    for (let subChannel of channel.children) {
-        terraForm(subChannel, items, currentFolder, config)
+        */
     }
 }

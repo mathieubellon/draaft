@@ -3,8 +3,9 @@ import * as fs from 'fs-extra'
 import * as matter from 'gray-matter'
 import * as yaml from 'js-yaml'
 import * as _ from 'lodash'
+import * as path from 'path'
 import {signal} from './signal'
-import {DraaftConfiguration} from './types'
+import {DraaftConfiguration, Item} from './types'
 
 /**
  * Build a filepath for content according to Hugo io local config (i18n)
@@ -12,28 +13,34 @@ import {DraaftConfiguration} from './types'
  * @param document : Draaft document returned by Api
  * @param options : Extension configuration object
  */
-export function fullFilePath(inFolder: string, document: any, options: DraaftConfiguration): string {
-    let buildedFilePath = inFolder
+export function getItemDirPath(parentFolder: string, item: Item, options: DraaftConfiguration): string {
+    let itemDirPath = parentFolder
     // first level folder may be 'en' or 'fr' if user decides so
     if (options.i18nActivated && options.i18nContentLayout === 'byfolder') {
-        let languageCode = document.language ? document.language.split('_')[0] : options.i18nDefaultLanguage // fr_FR -> fr
-        buildedFilePath = buildedFilePath + '/' + languageCode
+        let languageCode = item.language ? item.language.split('_')[0] : options.i18nDefaultLanguage // fr_FR -> fr
+        itemDirPath = path.join(itemDirPath, languageCode)
     }
-    // Depending on channels from draaft we need to create subfolders
-    // if (options.excludeTopFolder) {
-    //     folders.shift()
-    // }
-    let buildedFileName = document.title ? `${document.id}-${slugify(document.title)}` : `${document.id}-notitle`
+    return itemDirPath
+}
+
+/**
+ * Build a filepath for content according to Hugo io local config (i18n)
+ *
+ * @param item : Draaft document returned by Api
+ * @param options : Extension configuration object
+ */
+export function getItemFileName(item: Item, options: DraaftConfiguration): string {
+    let itemFileName = item.title ? `${item.id}-${slugify(item.title)}` : `${item.id}-notitle`
     // Append correct extension
-    if (options.i18nActivated && options.i18nContentLayout === 'byfilename' && document.language) {
-        let languageCode = document.language.split('_')[0] // fr_FR -> fr
-        buildedFileName = buildedFileName + '.' + languageCode + '.md'
+    if (options.i18nActivated && options.i18nContentLayout === 'byfilename' && item.language) {
+        let languageCode = item.language.split('_')[0] // fr_FR -> fr
+        itemFileName = itemFileName + '.' + languageCode + '.md'
     } else {
         // Content language can be set by folder structure or front matter property
         // so leave filemane agnostic
-        buildedFileName = buildedFileName + '.md'
+        itemFileName = itemFileName + '.md'
     }
-    return buildedFilePath + '/' + buildedFileName
+    return itemFileName
 }
 
 // Take a source content object as map it with local custom content schema
@@ -45,25 +52,25 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
         customTags.push(tag.name)
     })
     frontmatter.tags = customTags
-    // cargo body doit virer comme si schema en custom sauf si en schema c'est true
+    // content body doit virer comme si schema en custom sauf si en schema c'est true
     if (schema) {
-        // schema will only customise 'frontmatter.cargo' key, not frontmatter
-        for (let key of Object.keys(frontmatter.cargo)) {
-            // Do not show in frontmatter.cargo
+        // schema will only customise 'frontmatter.content' key, not frontmatter
+        for (let key of Object.keys(frontmatter.content)) {
+            // Do not show in frontmatter.content
             if (schema[key].fm_show === false) {
-                delete frontmatter.cargo[key]
+                delete frontmatter.content[key]
             }
-            // Rename key in frontmatter.cargo
+            // Rename key in frontmatter.content
             if (key !== schema[key].fm_key) {
                 let newKey = schema[key].fm_key
                 let oldKey = key
-                frontmatter.cargo[newKey] = frontmatter.cargo[oldKey]
-                delete frontmatter.cargo[oldKey]
+                frontmatter.content[newKey] = frontmatter.content[oldKey]
+                delete frontmatter.content[oldKey]
             }
         }
     } else {
-        if (frontmatter.cargo.body) {
-            delete frontmatter.cargo.body
+        if (frontmatter.content.body) {
+            delete frontmatter.content.body
         }
     }
 
@@ -83,17 +90,16 @@ function customiseFrontmatter(frontmatter: any, schema?: any): any {
 /**
  * Prepare file contents before writing it
  *
- * @param channel : Channel of the item
  * @param item : Draaft item returned by Api
  */
-export function fileContent(channel: any, item: any): string {
+export function fileContent(item: any): string {
     // Everything from document is in frontmatter (for now, may be updated downwards)
     let frontmatter = _.cloneDeep(item)
     let markdown = ''
 
     // If we have a body in content use it for markdown source
-    if (item.cargo.body && item.cargo.body !== '') {
-        markdown = item.cargo.body
+    if (item.content.body) {
+        markdown = item.content.body
     }
 
     // Do we have a local content schema ?
@@ -110,6 +116,5 @@ export function fileContent(channel: any, item: any): string {
         customiseFrontmatter(frontmatter)
     }
 
-    let cargoToWrite = matter.stringify(markdown, frontmatter)
-    return cargoToWrite
+    return matter.stringify(markdown, frontmatter)
 }

@@ -1,22 +1,14 @@
 import axios from 'axios'
-import * as path from 'path'
-import * as querystring from 'querystring'
 import * as url from 'url'
-import {DraaftConfiguration} from './types'
-
-function getUrl(endpoint: string, config: DraaftConfiguration, qsparams?: any): string {
-    let urlFormatOptions: any = {
-        protocol: config.apiScheme,
-        host: config.apiHost,
-    }
-    urlFormatOptions.pathname = path.join(config.apiBasePath, endpoint)
-    let urlString = url.format(urlFormatOptions)
-    const myURL = new URL(urlString)
-    if (qsparams) {
-        myURL.search = querystring.stringify(qsparams)
-    }
-    return myURL.href
-}
+import {
+    Channel,
+    ChannelsApiResponse,
+    DraaftConfiguration,
+    ItemsApiResponse,
+    ItemType,
+    ItemTypesApiResponse,
+    WorkflowStateApiResponse
+} from './types'
 
 //https://github.com/matt-major/do-wrapper/blob/3bb0d1dbfaa7dc1188a3567321c7def40a8df74a/src/do-wrapper.js#L271
 //https://github.com/matt-major/do-wrapper/blob/3bb0d1dbfaa7dc1188a3567321c7def40a8df74a/src/request-helper.js#L19
@@ -31,95 +23,73 @@ export default class DraaftAPI {
      */
     constructor(config: DraaftConfiguration) {
         this.config = config
+        let baseUrl = url.format({
+            protocol: this.config.apiScheme,
+            host: this.config.apiHost,
+            pathname: this.config.apiBasePath + '/',
+        })
         this.httpclient = axios.create({
+            baseURL: baseUrl,
             headers: {
                 Authorization: `Token ${config.token}`
             }
         })
     }
 
+    async get(endpoint: string, query?: any): Promise<any> {
+        let response = await this.httpclient({
+            url: endpoint,
+            method: 'GET',
+            params: query,
+        })
+        return response.data
+    }
+
     /**
      * Get all channels
-     * Info {@link https://www.draaft.io/documentation/api/pre-alpha/#channels channels}
-     * @param [callback] - Optional function to execute on completion
-     * @returns - Returns a promise if [callback] is not defined
+     * Info {@link https://www.draaft.io/documentation/api/beta/#channels channels}
      */
-    async channelsGetAll(query: any) {
-        const requestUrl = getUrl('channels', this.config, query)
-        return this.httpclient.get(requestUrl)
-            .then((response: any) => {
-                return response.data
-            })
-            .catch((error: any) => {
-                return error
-            })
+    channelsGetAll(query: any): Promise<ChannelsApiResponse> {
+        return this.get('channels', query)
+    }
+
+    /**
+     * Get one channel by id
+     * Info {@link https://www.draaft.io/documentation/api/beta/#channels channels}
+     */
+    channelsGetOne(id: number, query: any): Promise<Channel> {
+        return this.get(`channels/${id}`, query)
     }
 
     /**
      * Get items list
-     * Info {@link https://www.draaft.io/documentation/api/pre-alpha/#items items}
-     * @param [callback] - Optional function to execute on completion
-     * @returns Returns a promise if [callback] is not defined
+     * Info {@link https://www.draaft.io/documentation/api/beta/#items items}
      */
-    itemsGetAll(query: any) {
-        const requestUrl = getUrl('items', this.config, query)
-        return this.httpclient.get(requestUrl)
-            .then((response: any) => {
-                return response.data
-            })
-            .catch((error: any) => {
-                return error
-            })
+    itemsGetAll(query: any): Promise<ItemsApiResponse> {
+        return this.get('items', query)
     }
 
     /**
      * Get wokflow states list
-     * Info {@link https://www.draaft.io/documentation/api/pre-alpha/#workflow workflow}
-     * @param [callback] - Optional function to execute on completion
-     * @returns Returns a promise if [callback] is not defined
+     * Info {@link https://www.draaft.io/documentation/api/beta/#workflow workflow}
      */
-    workflowGetAll(query: any) {
-        const requestUrl = getUrl('workflow_states', this.config, query)
-        return this.httpclient.get(requestUrl)
-            .then((response: any) => {
-                return response.data
-            })
-            .catch((error: any) => {
-                return error
-            })
+    workflowGetAll(query: any): Promise<WorkflowStateApiResponse> {
+        return this.get('workflow_states', query)
     }
 
     /**
-     * Get content types list
-     * Info {@link https://www.draaft.io/documentation/api/pre-alpha/#types types}
-     * @param [callback] - Optional function to execute on completion
-     * @returns Returns a promise if [callback] is not defined
+     * Get item types list
+     * Info {@link https://www.draaft.io/documentation/api/beta/#types types}
      */
-    typesGetAll(query: any) {
-        const requestUrl = getUrl('item_types', this.config, query)
-        return this.httpclient.get(requestUrl)
-            .then((response: any) => {
-                return response.data
-            })
-            .catch((error: any) => {
-                return error
-            })
+    typesGetAll(query: any): Promise<ItemTypesApiResponse> {
+        return this.get('item_types', query)
     }
 
     /**
-     * Get content type
-     * Info {@link https://www.draaft.io/documentation/api/pre-alpha/#types types}
-     * @param [callback] - Optional function to execute on completion
-     * @returns Returns a promise if [callback] is not defined
+     * Get one item type by id
+     * Info {@link https://www.draaft.io/documentation/api/beta/#types types}
      */
-    typesGetOne(id: number, query: any) {
-        const requestUrl = getUrl(`item_types/${id}`, this.config, query)
-        return this.httpclient.get(requestUrl)
-            .then((response: any) => {
-                return response.data
-            })
-            .catch((error: any) => {
-                return error
-            })
+    typesGetOne(id: number, query: any): Promise<ItemType> {
+        return this.get(`item_types/${id}`, query)
     }
 }

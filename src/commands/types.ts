@@ -8,7 +8,7 @@ import {createFile, createFileSafe} from '../write'
 const chalk = require('chalk')
 
 export default class Types extends BaseCommand {
-    static description = 'List all content types'
+    static description = 'List all item types'
 
     static flags = {
         help: flags.help({char: 'h'}),
@@ -55,34 +55,34 @@ export default class Types extends BaseCommand {
         const {flags, args} = this.parse(Types)
         let typesList = []
 
-        // Get content types list
+        // Get item types list
         if (args.id) {
             try {
-                this.spinner.start(`Get one content type (${args.id})`)
+                this.spinner.start(`Get one item type (${args.id})`)
                 typesList.push(await this.api.typesGetOne(args.id))
-                this.spinner.succeed(`content type ${args.id} downloaded`)
+                this.spinner.succeed(`item type ${args.id} downloaded`)
                 if (flags.save) {
                     this.saveTypeToDisk(typesList[0], flags.backup)
                 }
             } catch (error) {
-                this.spinner.fail('Error while downloading content type')
+                this.spinner.fail('Error while downloading item type')
                 signal.fatal(error)
                 this.exit(1)
             }
         } else {
             try {
-                this.spinner.start('Get content types list')
+                this.spinner.start('Get item types list')
                 let firstPage = await this.api.typesGetAll()
-                typesList = firstPage.results
-                this.spinner.succeed('content types list downloaded')
-                this.log('This list represents all content types created by the user \n ===================')
+                typesList = firstPage.objects
+                this.spinner.succeed('item types list downloaded')
+                this.log('This list represents all item types created by the user \n ===================')
             } catch (error) {
-                this.spinner.fail('Error while downloading content types list')
+                this.spinner.fail('Error while downloading item types list')
                 signal.fatal(error)
                 this.exit(1)
             }
         }
-        typesList.forEach((type: any) => {
+        for (let type of typesList) {
             this.log(`📐  ${type.name} [id:${type.id}]`)
             if (flags.schema) {
                 type.content_schema.forEach((field: any) => {
@@ -90,6 +90,6 @@ export default class Types extends BaseCommand {
                     this.log(`    ${field.name} ${chalk.yellow(field.type)} ${chalk.gray(required)}`)
                 })
             }
-        })
+        }
     }
 }

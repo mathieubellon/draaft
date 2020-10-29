@@ -88,7 +88,6 @@ USAGE
 
 OPTIONS
   -h, --help         show CLI help
-  -n, --notopfolder  Do not create a folder for the top directory
   -o, --overwrite    Empty destination folder before writing
   --channel=channel  Channel to pull content from [int]
   --dest=dest        Destination folder where to write files
@@ -115,7 +114,7 @@ _See code: [src/commands/states.ts](https://github.com/draaft/cli/blob/v0.0.1/sr
 
 ## `draaft types [OPTIONS]`
 
-List all content types
+List all item types
 
 ```
 USAGE
@@ -123,7 +122,6 @@ USAGE
 
 OPTIONS
   -h, --help       show CLI help
-  -s, --showcargo  Display content schema for each type
 ```
 
 _See code: [src/commands/types.ts](https://github.com/draaft/cli/blob/v0.0.1/src/commands/types.ts)_

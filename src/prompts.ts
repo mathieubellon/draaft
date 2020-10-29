@@ -29,7 +29,7 @@ export const askToken = () => {
 export const askChannels = (channels: Channel[]) => {
     let choices = _.map(channels, elt => {
         return {
-            name: elt.hierarchy,
+            name: elt.name,
             value: elt.id
         }
     })
