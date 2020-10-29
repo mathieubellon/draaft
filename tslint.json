@@ -1,7 +1,8 @@
 {
     "extends": "@oclif/tslint",
     "rules": {
-        "indent": [true, "spaces", 2],
+        "indent": [true, "spaces", 4],
+        "ter-indent": [true, 4, { "MemberExpression": 1 }],
         "ordered-imports": [false],
         "object-literal-sort-keys": [false],
         "object-curly-spacing": false
