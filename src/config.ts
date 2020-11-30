@@ -17,4 +17,5 @@ export const defaultConfiguration: types.DraaftConfiguration = {
     overwrite: false,
     ssg: 'hugo',
     token: '',
+    useChannelName: false,
 }

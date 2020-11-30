@@ -17,6 +17,7 @@ export type DraaftConfiguration = {
     overwrite: boolean
     ssg: SSGTypes
     token: string
+    useChannelName: boolean
 }
 
 export type ChannelHierarchyNode = any
