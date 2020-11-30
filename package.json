@@ -1,7 +1,7 @@
 {
     "name": "draaft-cli",
     "description": "A CLI to pull content from https://pilot.pm content collaboration platform and feed your static site generator with markdown files",
-    "version": "0.0.1",
+    "version": "0.0.1-alpha1",
     "author": "Matthieu Bellon @matthieubellon",
     "bin": {
         "draaft": "./bin/run"
@@ -56,9 +56,11 @@
         "/npm-shrinkwrap.json",
         "/oclif.manifest.json"
     ],
-    "homepage": "https://github.com/draaft/cli",
+    "homepage": "https://github.com/hbyio/draaft/",
     "keywords": [
-        "oclif"
+        "pilot.pm",
+        "hugo",
+        "gohugo"
     ],
     "license": "MIT",
     "main": "lib/index.js",
@@ -70,7 +72,7 @@
             "@oclif/plugin-help"
         ]
     },
-    "repository": "draaft/cli",
+    "repository": "hbyio/draaft",
     "scripts": {
         "postpack": "rm -f oclif.manifest.json",
         "posttest": "tslint -p test -t stylish",
