@@ -43,7 +43,7 @@ jobs:
 
 workflows:
   version: 2
-  "draaft-cli":
+  "draaft":
     jobs:
       - node-latest
       - node-8
