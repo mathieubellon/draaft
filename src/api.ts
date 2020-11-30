@@ -18,8 +18,7 @@ export default class DraaftAPI {
 
     /**
      * Draaft API Wrapper
-     * @param token - Your Private API Token
-     * @param perPage - Page Size of results to return
+     * @param config - Draaft configuration
      */
     constructor(config: DraaftConfiguration) {
         this.config = config

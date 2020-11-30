@@ -9,6 +9,7 @@ export type DraaftConfiguration = {
     apiScheme: string
     configDir: string
     confirmFetch?: boolean
+    contentFieldName: string,
     excludeTopFolder: boolean // Because you may organize your content on Draaft and grouping all channels for this website
     i18nActivated: boolean
     i18nContentLayout: LayoutTypes

@@ -14,6 +14,12 @@ const options = {
             label: 'created',
             logLevel: 'info'
         },
+        downloaded: {
+            badge: '⇓',
+            color: 'green',
+            label: 'downloaded',
+            logLevel: 'info'
+        },
         updated: {
             badge: '♻',
             color: 'yellow',

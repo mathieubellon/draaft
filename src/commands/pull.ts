@@ -4,7 +4,7 @@ import * as _ from 'lodash'
 import {BaseCommand} from '../base'
 import {askChannels, askDestDir} from '../prompts'
 import {signal} from '../signal'
-import {terraformChannel, terraformItems} from '../terraform'
+import {Terraformer} from '../terraform'
 import {Channel, ItemsApiResponse} from '../types'
 
 const chalk = require('chalk')
@@ -98,8 +98,10 @@ export default class Pull extends BaseCommand {
             return
         }
 
+        let terraformer = new Terraformer(this.draaftConfig)
+
         signal.terraforming(chalk.blue('Creating the folder hierarchy'))
-        terraformChannel(selectedChannel, destFolder, this.configuration)
+        terraformer.terraformChannel(selectedChannel, destFolder)
 
         signal.terraforming(chalk.blue('Creating the content files'))
         // Get items and write them to disk
@@ -123,7 +125,7 @@ export default class Pull extends BaseCommand {
                 this.spinner.succeed('Items list downloaded')
 
                 // Write to disk
-                terraformItems(pageResult.objects, this.configuration)
+                await terraformer.terraformItems(pageResult.objects)
 
                 page = pageResult.next
             } catch (error) {

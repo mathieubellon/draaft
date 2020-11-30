@@ -2,11 +2,11 @@ import Command from '@oclif/command'
 import * as Conf from 'conf'
 import * as _ from 'lodash'
 import * as ora from 'ora'
-import draaftapi from './api'
-import {defaultconfiguration} from './config'
+import DraaftAPI from './api'
+import {defaultConfiguration} from './config'
 import {DraaftConfiguration} from './types'
 
-const config = new Conf({
+const conf = new Conf({
     projectName: 'draaft',
     configName: 'config',
     cwd: './.draaft'
@@ -18,27 +18,27 @@ export abstract class BaseCommand extends Command {
     // }
     token!: string
     spinner: any
-    configuration!: DraaftConfiguration
+    draaftConfig!: DraaftConfiguration
     api: any
 
     async init() {
-        if (!config.has('token') || config.get('token') === '') {
+        if (!conf.has('token') || conf.get('token') === '') {
             const {askToken} = require('./prompts')
             const {token} = await askToken()
             this.setToken('token', token)
         }
-        this.configuration = _.merge(defaultconfiguration, config.store)
-        config.store = this.configuration
-        this.api = new draaftapi(this.configuration)
+        this.draaftConfig = _.merge(defaultConfiguration, conf.store)
+        conf.store = this.draaftConfig
+        this.api = new DraaftAPI(this.draaftConfig)
         this.spinner = ora()
     }
 
     getToken(key: string) {
-        config.get(key)
+        conf.get(key)
     }
 
     setToken(key: string, value: string) {
-        config.set(key, value)
+        conf.set(key, value)
     }
 }
 
