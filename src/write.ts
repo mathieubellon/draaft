@@ -20,26 +20,27 @@ export function ensureDir(dirPath: string) : void{
     }
 }
 
-export function createFile(path: string, content: string) {
+export function createFile(filePath: string, content: string) {
     try {
-        fs.writeFileSync(path, content)
+        ensureDir(path.dirname(filePath))
+        fs.writeFileSync(filePath, content)
     } catch (error) {
         signal.fatal('Could not write file', error)
         throw new CLIError(error)
     }
 }
 
-export function createFileSafe(path: string, content: string): void {
-    if (fs.existsSync(path)) {
+export function createFileSafe(filePath: string, content: string): void {
+    if (fs.existsSync(filePath)) {
         try {
-            fs.copySync(path, `${path}.backup`)
-            createFile(path, content)
+            fs.copySync(filePath, `${filePath}.backup`)
+            createFile(filePath, content)
         } catch (error) {
             signal.fatal('Could not create backup file', error)
             throw new CLIError(error)
         }
     } else {
-        createFile(path, content)
+        createFile(filePath, content)
     }
 }
 
