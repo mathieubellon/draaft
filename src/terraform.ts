@@ -1,4 +1,3 @@
-import {CLIError} from '@oclif/errors'
 import * as fs from 'fs-extra'
 import * as matter from 'gray-matter'
 import * as _ from 'lodash'
@@ -10,13 +9,9 @@ import * as write from './write'
 import slugify = require('@sindresorhus/slugify')
 const chalk = require('chalk')
 
-import {Channel, ChannelHierarchy, DraaftConfiguration, Item} from './types'
+import {Channel, ChannelHierarchy, DraaftConfiguration, I18nMode, Item} from './types'
 
-
-const currentPath = process.cwd()
-const IMAGE_DIR = path.join(currentPath, 'static', 'img')
 const MARKDOWN_IMAGE_REGEX = /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g
-
 
 let itemFoldersMap: Record<number, string> = {}
 
@@ -31,26 +26,6 @@ export class Terraformer{
         this.config = config
     }
 
-    createDir(dirPath: string) : void{
-        try {
-            fs.ensureDirSync(dirPath)
-            signal.created(`📁 ${dirPath}`)
-        } catch (error) {
-            signal.fatal(`📁 ${dirPath} not created`)
-            throw new CLIError(error)
-        }
-    }
-
-    createContentFile(dirPath: string, fileName: string, content: string) : void{
-        try {
-            write.createFile(path.join(dirPath, fileName), content)
-            signal.created(`📄 ${chalk.gray(dirPath)}${path.sep}${fileName}`)
-        } catch (error) {
-            signal.fatal(error)
-            throw new CLIError(error)
-        }
-    }
-
     terraformChannel(channel: Channel, parentPath: string): void {
         let channelDirPath
         if( this.config.useChannelName ){
@@ -62,7 +37,7 @@ export class Terraformer{
         }
 
         // Create section folder
-        this.createDir(channelDirPath)
+        write.ensureDir(channelDirPath)
 
         // Create _index.md file for channel root dir
         let frontmatter: any = _.cloneDeep(channel)
@@ -73,7 +48,7 @@ export class Terraformer{
             delete frontmatter.children
         }
         let indexContent = matter.stringify(String(frontmatter.description), frontmatter)
-        this.createContentFile(channelDirPath, '_index.md', indexContent)
+        write.createContentFile(channelDirPath, '_index.md', indexContent)
 
         this.writeChannelHierarchy(channel.hierarchy, channelDirPath)
     }
@@ -82,9 +57,9 @@ export class Terraformer{
         for( let node of hierarchy ){
             if( node.type == 'folder' ){
                 let folderPath = path.join(parentDirPath, node.name)
-                this.createDir(folderPath)
+                write.ensureDir(folderPath)
                 let indexContent = matter.stringify(node.name, {title: node.name})
-                this.createContentFile(folderPath, '_index.md', indexContent)
+                write.createContentFile(folderPath, '_index.md', indexContent)
 
                 this.writeChannelHierarchy(node.nodes, folderPath)
             }
@@ -120,10 +95,10 @@ export class Terraformer{
             throw `Item ${item.id} has no correspondence in the hierarchy`
         }
 
-        let dirPath = this.getItemDirPath(itemFolder, item)
-        let fileName = this.getItemFileName(item)
-        let content = await this.getFileContent(item)
-        this.createContentFile(dirPath, fileName, content)
+        let itemDirPath = this.getItemDirPath(itemFolder, item)
+        let itemFileName = this.getItemFileName(item)
+        let itemFileContent = await this.getItemFileContent(item, itemDirPath)
+        write.createContentFile(itemDirPath, itemFileName, itemFileContent)
     }
 
     /**
@@ -135,12 +110,21 @@ export class Terraformer{
     getItemDirPath(parentFolder: string, item: Item): string {
         let itemDirPath = parentFolder
         // first level folder may be 'en' or 'fr' if user decides so
-        if (this.config.i18nActivated && this.config.i18nContentLayout === 'byfolder') {
+        if ( this.config.i18nMode === I18nMode.folder) {
             // fr_FR -> fr
             let languageCode = item.language ? item.language.split('_')[0] : this.config.i18nDefaultLanguage
             itemDirPath = path.join(itemDirPath, languageCode)
         }
+
+        if( this.config.bundlePages ){
+            itemDirPath = path.join(itemDirPath,  this.getItemSlug(item))
+        }
+
         return itemDirPath
+    }
+
+    getItemSlug(item: Item){
+        return item.title ? `${item.id}-${slugify(item.title)}` : `${item.id}-notitle`
     }
 
     /**
@@ -150,16 +134,15 @@ export class Terraformer{
      * @param options : Extension configuration object
      */
     getItemFileName(item: Item): string {
-        let itemFileName = item.title ? `${item.id}-${slugify(item.title)}` : `${item.id}-notitle`
-        // Append correct extension
-        if (this.config.i18nActivated && this.config.i18nContentLayout === 'byfilename' && item.language) {
+        let itemFileName = this.config.bundlePages ? 'index' : this.getItemSlug(item)
+
+        if ( this.config.i18nMode === I18nMode.filename && item.language) {
             let languageCode = item.language.split('_')[0] // fr_FR -> fr
             itemFileName = itemFileName + '.' + languageCode + '.md'
         } else {
-            // Content language can be set by folder structure or front matter property
-            // so leave filemane agnostic
             itemFileName = itemFileName + '.md'
         }
+
         return itemFileName
     }
 
@@ -168,18 +151,18 @@ export class Terraformer{
      *
      * @param item : Draaft item returned by Api
      */
-    async getFileContent(item: any): Promise<string> {
+    async getItemFileContent(item: any, itemDirPath: string): Promise<string> {
         // Everything from document is in frontmatter (for now, may be updated downwards)
         let frontmatter = _.cloneDeep(item)
         let markdown = ''
 
         // If we have a content field, use it for markdown source
         if ( item.content.hasOwnProperty(this.config.contentFieldName) ){
-            markdown = await this.fetchImages(item.content[this.config.contentFieldName])
+            markdown = item.content[this.config.contentFieldName]
+            markdown = await this.fetchImages(markdown, itemDirPath)
         }
 
         // Do we have a local content schema ?
-
         let typeFilePath = `.draaft/type-${frontmatter.item_type}.yml`
         let typefile: any
         if (fs.existsSync(typeFilePath)) {
@@ -238,8 +221,7 @@ export class Terraformer{
         return frontmatter
     }
 
-    async fetchImages(markdown: string): Promise<string>{
-        this.createDir(IMAGE_DIR)
+    async fetchImages(markdown: string, itemDirPath: string): Promise<string>{
         let imagePromises = []
 
         for( let match of markdown.matchAll(MARKDOWN_IMAGE_REGEX) ){
@@ -249,13 +231,17 @@ export class Terraformer{
 
             let imageUrl = match.groups.filename.trim()
             let imageName = imageUrl.split('/').slice(-1)[0]
-            markdown = markdown.replace(imageUrl, '/img/' + imageName)
+            // If we're bundling images with content, we use a relative ref.
+            // Else, we'll put it into the statics directory, and use an absolute ref.
+            let imageRefInMarkdown = this.config.bundlePages ? imageName : ('/img/' + imageName)
+            markdown = markdown.replace(imageUrl, imageRefInMarkdown)
 
-            let writeStream = fs.createWriteStream(path.join(IMAGE_DIR, imageName))
             let imagePromise = axios.get(imageUrl, {responseType: 'stream'})
             .then(response => {
-                response.data.pipe(writeStream)
-                signal.downloaded(`${chalk.gray(IMAGE_DIR)}${path.sep}${imageName}`)
+                // If we're bundling images with content, we use the page bundle directory.
+                // Else, we use the static directory.
+                let imageDir =  this.config.bundlePages ? itemDirPath : write.IMAGE_DIR
+                write.createImageFile(imageDir, imageName,  response)
             })
             imagePromises.push(imagePromise)
         }
