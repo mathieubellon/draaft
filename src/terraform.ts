@@ -1,19 +1,26 @@
+import axios from 'axios'
 import * as fs from 'fs-extra'
 import * as matter from 'gray-matter'
+import * as yaml from 'js-yaml'
 import * as _ from 'lodash'
 import * as path from 'path'
-import * as yaml from 'js-yaml'
+import * as toml from '@iarna/toml'
+import slugify from '@sindresorhus/slugify'
 import {signal} from './signal'
-import axios from 'axios'
+import {Channel, ChannelHierarchy, DraaftConfiguration, I18nMode, Item, SSGType} from './types'
 import * as write from './write'
-import slugify = require('@sindresorhus/slugify')
-const chalk = require('chalk')
 
-import {Channel, ChannelHierarchy, DraaftConfiguration, I18nMode, Item} from './types'
 
 const MARKDOWN_IMAGE_REGEX = /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g
 
 let itemFoldersMap: Record<number, string> = {}
+
+const matterEngines = {
+    toml: {
+        parse: (input: string) => toml.parse(input),
+        stringify:  (data: object) => toml.stringify(<toml.JsonMap> data),
+    }
+}
 
 export class Terraformer{
     config: DraaftConfiguration
@@ -24,6 +31,13 @@ export class Terraformer{
      */
     constructor(config: DraaftConfiguration) {
         this.config = config
+    }
+
+    matterize(content: string, frontmatter: Object){
+        return matter.stringify(content, frontmatter, {
+            language: this.config.frontmatterFormat,
+            engines: matterEngines
+        })
     }
 
     terraformChannel(channel: Channel, parentPath: string): void {
@@ -41,13 +55,13 @@ export class Terraformer{
 
         // Create _index.md file for channel root dir
         let frontmatter: any = _.cloneDeep(channel)
-        if (this.config.ssg === 'hugo') {
+        if (this.config.ssg === SSGType.hugo) {
             frontmatter.title = channel.name
             delete frontmatter.name
             delete frontmatter.hierarchy
             delete frontmatter.children
         }
-        let indexContent = matter.stringify(String(frontmatter.description), frontmatter)
+        let indexContent = this.matterize(String(frontmatter.description), frontmatter)
         write.createContentFile(channelDirPath, '_index.md', indexContent)
 
         this.writeChannelHierarchy(channel.hierarchy, channelDirPath)
@@ -58,7 +72,7 @@ export class Terraformer{
             if( node.type == 'folder' ){
                 let folderPath = path.join(parentDirPath, node.name)
                 write.ensureDir(folderPath)
-                let indexContent = matter.stringify(node.name, {title: node.name})
+                let indexContent = this.matterize(node.name, {title: node.name})
                 write.createContentFile(folderPath, '_index.md', indexContent)
 
                 this.writeChannelHierarchy(node.nodes, folderPath)
@@ -176,7 +190,7 @@ export class Terraformer{
             this.customiseFrontmatter(frontmatter)
         }
 
-        return matter.stringify(markdown, frontmatter)
+        return this.matterize(markdown, frontmatter)
     }
 
     // Take a source content object as map it with local custom content schema

@@ -9,9 +9,10 @@ export const defaultConfiguration: types.DraaftConfiguration = {
     apiScheme: SCHEME,
     bundlePages: true,
     contentFieldName: 'body',
+    frontmatterFormat: types.FrontmatterFormat.yaml,
     i18nMode: types.I18nMode.none,
     i18nDefaultLanguage: 'en',
-    ssg: 'hugo',
+    ssg: types.SSGType.hugo,
     token: '',
     useChannelName: false,
 }

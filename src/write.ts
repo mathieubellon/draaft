@@ -1,8 +1,8 @@
 import {CLIError} from '@oclif/errors'
 import * as fs from 'fs-extra'
 import * as path from 'path'
+import chalk from 'chalk'
 import {signal} from './signal'
-const chalk = require('chalk')
 
 
 const currentPath = process.cwd()

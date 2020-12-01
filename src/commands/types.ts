@@ -1,11 +1,10 @@
 import {flags} from '@oclif/command'
 import * as yaml from 'js-yaml'
 import * as path from 'path'
+import chalk from 'chalk'
 import {BaseCommand} from '../base'
 import {signal} from '../signal'
 import {createFile, createFileSafe} from '../write'
-
-const chalk = require('chalk')
 
 export default class Types extends BaseCommand {
     static description = 'List all item types'

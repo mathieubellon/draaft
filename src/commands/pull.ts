@@ -1,13 +1,13 @@
 import {flags} from '@oclif/command'
 import {emptyDirSync, ensureDirSync} from 'fs-extra'
 import * as _ from 'lodash'
+import chalk from 'chalk'
 import {BaseCommand} from '../base'
 import {askChannels, askDestDir} from '../prompts'
 import {signal} from '../signal'
 import {Terraformer} from '../terraform'
 import {Channel, ItemsApiResponse} from '../types'
 
-const chalk = require('chalk')
 
 export default class Pull extends BaseCommand {
     static description = 'Pull content and create files on disk'

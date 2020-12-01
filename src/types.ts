@@ -1,9 +1,16 @@
 
-export type SSGTypes = 'hugo' | 'gatsby'
+export enum FrontmatterFormat {
+    yaml = "yaml",
+    toml = "toml",
+}
 export enum I18nMode {
     none = "none",
     folder = "folder",
     filename = "filename",
+}
+export enum SSGType {
+    hugo = "hugo",
+    gatsby = "gatsby",
 }
 
 export type DraaftConfiguration = {
@@ -12,9 +19,10 @@ export type DraaftConfiguration = {
     apiScheme: string
     bundlePages: boolean,
     contentFieldName: string,
-    i18nMode: I18nMode,
+    frontmatterFormat: FrontmatterFormat
+    i18nMode: I18nMode
     i18nDefaultLanguage: string
-    ssg: SSGTypes
+    ssg: SSGType
     token: string
     useChannelName: boolean
 }
