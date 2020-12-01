@@ -1,7 +1,7 @@
 {
     "name": "draaft",
     "description": "A CLI to pull content from https://pilot.pm content collaboration platform and feed your static site generator with markdown files",
-    "version": "0.0.1-alpha2",
+    "version": "0.0.1-alpha3",
     "author": "Matthieu Bellon @matthieubellon",
     "bin": {
         "draaft": "./bin/run"
@@ -74,9 +74,9 @@
     },
     "repository": "hbyio/draaft",
     "scripts": {
-        "postpack": "rm -f oclif.manifest.json",
+        "readme": "oclif-dev manifest && oclif-dev readme",
         "posttest": "tslint -p test -t stylish",
-        "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
+        "prepack": "tsc -b",
         "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
         "version": "oclif-dev readme && git add README.md"
     },
