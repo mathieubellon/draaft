@@ -16,29 +16,21 @@ export abstract class BaseCommand extends Command {
     // static flags = {
     //   loglevel: flags.string({ options: ['error', 'warn', 'info', 'debug'] })
     // }
-    token!: string
+    apiToken!: string
     spinner: any
     draaftConfig!: DraaftConfiguration
     api: any
 
     async init() {
-        if (!conf.has('token') || conf.get('token') === '') {
+        if (!conf.has('apiToken') || conf.get('apiToken') === '') {
             const {askToken} = require('./prompts')
-            const {token} = await askToken()
-            this.setToken('token', token)
+            const {apiToken} = await askToken()
+            conf.set('apiToken', apiToken)
         }
         this.draaftConfig = _.merge(defaultConfiguration, conf.store)
         conf.store = this.draaftConfig
         this.api = new DraaftAPI(this.draaftConfig)
         this.spinner = ora()
-    }
-
-    getToken(key: string) {
-        conf.get(key)
-    }
-
-    setToken(key: string, value: string) {
-        conf.set(key, value)
     }
 }
 

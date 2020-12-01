@@ -15,8 +15,8 @@ export const confirmAction = (confirmMessage = 'Are you sure ?') => {
 export const askToken = () => {
     return prompt({
         type: 'password',
-        name: 'token',
-        message: 'What is your token?',
+        name: 'apiToken',
+        message: 'What is your API token?',
         mask: '*'
     })
 }
@@ -58,7 +58,7 @@ export const askDestDir = () => {
             rootPath: './',
             // rootPath :: String
             // Root search directory
-            message: 'Select a destination folder where we will download your content to :',
+            message: 'Select a destination directory where we will download your content to :',
             default: './',
             suggestOnly: false,
             // suggestOnly :: Bool

@@ -30,7 +30,7 @@ export default class DraaftAPI {
         this.httpclient = axios.create({
             baseURL: baseUrl,
             headers: {
-                Authorization: `Token ${config.token}`
+                Authorization: `Token ${config.apiToken}`
             }
         })
     }

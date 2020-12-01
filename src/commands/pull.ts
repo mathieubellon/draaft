@@ -16,8 +16,8 @@ export default class Pull extends BaseCommand {
         help: flags.help({char: 'h'}),
         ssg: flags.string({description: 'Your static site generator.', options: ['hugo', 'gatsby'], default: 'hugo'}),
         channel: flags.integer({description: 'Channel to pull content from [int]'}),
-        dest: flags.string({description: 'Destination folder where to write files'}),
-        overwrite: flags.boolean({char: 'o', description: 'Empty destination folder before writing', default: false}),
+        dest: flags.string({description: 'Destination directory where to write files'}),
+        overwrite: flags.boolean({char: 'o', description: 'Empty destination directory before writing', default: false}),
     }
 
     async run() {
@@ -31,13 +31,13 @@ export default class Pull extends BaseCommand {
             destFolder = destFolderAnswer.path
         }
 
-        // Create top folder to place all content in. Create if not exists.
-        this.spinner.start(`Checking destination folder${chalk.blue(destFolder)}`)
+        // Create top directory to place all content in. Create if not exists.
+        this.spinner.start(`Checking destination directory ${chalk.blue(destFolder)}`)
         try {
             ensureDirSync(destFolder)
-            this.spinner.succeed(`Destination folder exists ${chalk.blue(destFolder)}`)
+            this.spinner.succeed(`Destination directory exists ${chalk.blue(destFolder)}`)
         } catch (error) {
-            this.spinner.fail(`Destination folder not created ${chalk.red(destFolder)}`)
+            this.spinner.fail(`Destination directory not created ${chalk.red(destFolder)}`)
             signal.fatal(error)
             this.exit(1)
         }
@@ -45,9 +45,9 @@ export default class Pull extends BaseCommand {
         if (flags.overwrite) {
             try {
                 emptyDirSync(destFolder)
-                this.spinner.succeed(`All files deleted in destination folder ${chalk.blue(destFolder)}`)
+                this.spinner.succeed(`All files deleted in destination directory ${chalk.blue(destFolder)}`)
             } catch (error) {
-                this.spinner.fail(`Error while cleaning destination folder ${chalk.red(destFolder)}`)
+                this.spinner.fail(`Error while cleaning destination directory ${chalk.red(destFolder)}`)
                 signal.fatal(error)
                 this.exit(1)
             }
@@ -100,7 +100,7 @@ export default class Pull extends BaseCommand {
 
         let terraformer = new Terraformer(this.draaftConfig)
 
-        signal.terraforming(chalk.blue('Creating the folder hierarchy'))
+        signal.terraforming(chalk.blue('Creating the directory hierarchy'))
         terraformer.terraformChannel(selectedChannel, destFolder)
 
         signal.terraforming(chalk.blue('Creating the content files'))

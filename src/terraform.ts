@@ -50,7 +50,7 @@ export class Terraformer{
             channelDirPath = parentPath
         }
 
-        // Create section folder
+        // Create channel directory
         write.ensureDir(channelDirPath)
 
         // Create _index.md file for channel root dir
@@ -86,7 +86,7 @@ export class Terraformer{
 
     /**
      * With a channel list and all items depending attached to it (on its children) build a directory of .md files
-     * with a proper folder structure and filename pattern according to user config
+     * with a proper directory structure and filename pattern according to user config
      *
      * @param items : List of items attached to this channel
      */
@@ -123,8 +123,8 @@ export class Terraformer{
      */
     getItemDirPath(parentFolder: string, item: Item): string {
         let itemDirPath = parentFolder
-        // first level folder may be 'en' or 'fr' if user decides so
-        if ( this.config.i18nMode === I18nMode.folder) {
+        // first level directory may be 'en' or 'fr' if user decides so
+        if ( this.config.i18nMode === I18nMode.directory) {
             // fr_FR -> fr
             let languageCode = item.language ? item.language.split('_')[0] : this.config.i18nDefaultLanguage
             itemDirPath = path.join(itemDirPath, languageCode)

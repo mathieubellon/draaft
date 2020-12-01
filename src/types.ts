@@ -5,7 +5,7 @@ export enum FrontmatterFormat {
 }
 export enum I18nMode {
     none = "none",
-    folder = "folder",
+    directory = "directory",
     filename = "filename",
 }
 export enum SSGType {
@@ -17,13 +17,13 @@ export type DraaftConfiguration = {
     apiBasePath: string
     apiHost: string
     apiScheme: string
+    apiToken: string
     bundlePages: boolean,
     contentFieldName: string,
     frontmatterFormat: FrontmatterFormat
     i18nMode: I18nMode
     i18nDefaultLanguage: string
     ssg: SSGType
-    token: string
     useChannelName: boolean
 }
 

@@ -1,9 +1,9 @@
-draaft
+Draaft
 ==========
 
 Draaft is a command line tool that simply allows you to retrieve content produced on Pilot for statics sites generators. [Pilot](https://pilot.pm) is a content production platform for marketing or communication teams.  
 
-🚨 ⚠ **Alpha version : This cli is absolutely not production ready and API is subject to changes** ⚠
+🚨 ⚠ **Alpha version : This cli is absolutely not production ready and API is subject to changes** ⚠ 🚨
 
 <!-- [![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
 [![Version](https://img.shields.io/npm/v/draaft.svg)](https://npmjs.org/package/draaft)
@@ -12,26 +12,84 @@ Draaft is a command line tool that simply allows you to retrieve content produce
 [![License](https://img.shields.io/npm/l/draaft.svg)](https://github.com/draaft/cli/blob/master/package.json) -->
 
 <!-- toc -->
+* [Installing](#installing)
 * [Usage](#usage)
+* [Configuration](#configuration)
 * [Commands](#commands)
 * [Roadmap](#roadmap)
 <!-- tocstop -->
 
+# Installing
+
+Using npm:
+
+```bash
+$ npm install -g draaft
+```
+
+Using yarn:
+
+```bash
+$ yarn global add draaft
+```
+
 # Usage
 
 <!-- usage -->
-```sh-session
-$ npm install -g draaft
-$ draaft COMMAND
-running command...
-$ draaft (-v|--version|version)
-draaft/0.0.1-alpha2 win32-x64 node-v12.20.0
-$ draaft --help [COMMAND]
-USAGE
-  $ draaft COMMAND
-...
+```bash
+$ draaft layout
+$ draaft pull --channel=CHANNEL_ID --dest=content
 ```
 <!-- usagestop -->
+
+# Configuration
+
+A configuration file with sensible defaults will be created for you in `.draaft/config.json` when you execute a first command. 
+
+```js
+{
+    // "http" or "https"
+    "apiScheme": "https",
+    
+    // The host of the API endpoint
+    "apiHost": "app.pilot.pm",
+
+    // The base path of the API endpoint.
+    // You can change this value to force a specific version of the API. 
+    "apiBasePath": "/integrations/beta",
+    
+    // The secret API token to authenticate yourself in the API
+    "apiToken": "secretToken",
+	   
+    // Should we make page bundles ?
+    // If `true`, draaft will create a bundle for each item, containing the content and resources (images).
+    // If `false`, all the resources will be created in the `/static/` directory
+    "bundlePages": true,
+
+    // The name of the field in `Item.content` that will be used for the page content.
+    "contentFieldName": "body",
+    
+    // How should we serialize the frontmatter ?
+    // Allowed values : "yaml" | "toml"
+    "frontmatterFormat": "yaml"
+
+    // Should we handle item translations, and if yes with which organization ?
+    // Allowed values : "none" | "directory" | "filename"
+    "i18nMode": "none",
+
+    // When i18n is activated, and an item has no language defined, fallback on `i18nDefaultLanguage`
+    "i18nDefaultLanguage": "en",
+
+    // Should we create a top-directory with the channel name ?
+    // If `true`, draaft will create all files into `/[destDir]/[channel.name]/`
+    // If `false`, draaft will create all files into `/[destDir]/`
+    "useChannelName": false,
+    
+    //Target Static Site Generator.
+    // For now, only "hugo" is supported
+    "ssg": "hugo"
+}
+```
 
 # Commands
 
@@ -85,9 +143,9 @@ USAGE
 
 OPTIONS
   -h, --help         show CLI help
-  -o, --overwrite    Empty destination folder before writing
+  -o, --overwrite    Empty destination directory before writing
   --channel=channel  Channel to pull content from [int]
-  --dest=dest        Destination folder where to write files
+  --dest=dest        Destination directory where to write files
   --ssg=hugo|gatsby  [default: hugo] Your static site generator.
 ```
 
@@ -137,14 +195,14 @@ _See code: [src\commands\types.ts](https://github.com/hbyio/draaft/blob/v0.0.1-a
 - [x] hugo.io : Create _index.file for sections
 - [x] generate basic Hugo layout
 - [x] Data mapper : let user map Draaft response keys to Frontmatter (use Hugo archetype maybe)
-- [ ] Select which pilot.pm workflow state map with the "draft" frontmatter key in Hugo
-- [ ] Basic documentation
+- [X] Generate page bundles
+- [X] Basic documentation
 ## Beta
 - [ ] Generate data files for complex layout (eg. home page)
-- [ ] Generate page bundles
 - [ ] Option : Flat layout (with frontmatter menu infos + hierarchy)
 - [ ] Option : Merge frontmatter
 - [ ] hugo.io : i18n support
+- [ ] Select which pilot.pm workflow state map with the "draft" frontmatter key in Hugo
 ## V1.0.0
 - [ ] Support Gatsby
 - [ ] Generate complete layout for Hugo and Gatsby with theme selector
