@@ -1,7 +1,7 @@
 {
     "name": "draaft",
     "description": "A CLI to pull content from https://pilot.pm content collaboration platform and feed your static site generator with markdown files",
-    "version": "0.0.1-alpha5",
+    "version": "0.1.0-alpha6",
     "author": "Matthieu Bellon @matthieubellon",
     "bin": {
         "draaft": "./bin/run"
