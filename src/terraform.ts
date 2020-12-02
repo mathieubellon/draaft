@@ -7,7 +7,7 @@ import * as path from 'path'
 import * as toml from '@iarna/toml'
 import slugify from '@sindresorhus/slugify'
 import {signal} from './signal'
-import {Channel, ChannelHierarchy, DraaftConfiguration, I18nMode, Item, SSGType} from './types'
+import {Channel, ChannelHierarchy, DraaftConfiguration, I18nMode, Item, SSGType, FrontmatterFormat} from './types'
 import * as write from './write'
 
 
@@ -36,7 +36,8 @@ export class Terraformer{
     matterize(content: string, frontmatter: Object){
         return matter.stringify(content, frontmatter, {
             language: this.config.frontmatterFormat,
-            engines: matterEngines
+            engines: matterEngines,
+            delimiters: this.config.frontmatterFormat == FrontmatterFormat.toml ? '+++' : '---'
         })
     }
 
