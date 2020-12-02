@@ -1,12 +1,7 @@
 import * as types from './types'
 
-const APIVERSION = 'beta'
-const SCHEME = process.env.DRAAFTENV === 'production' ? 'https' : 'http'
-
 export const defaultConfiguration: types.DraaftConfiguration = {
-    apiBasePath: `/integrations/${APIVERSION}`,
-    apiHost: 'app.pilot.pm',
-    apiScheme: SCHEME,
+    apiBaseUrl : 'https://app.pilot.pm/integrations/beta/',
     apiToken: '',
     bundlePages: true,
     contentFieldName: 'body',

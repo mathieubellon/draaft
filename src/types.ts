@@ -14,9 +14,7 @@ export enum SSGType {
 }
 
 export type DraaftConfiguration = {
-    apiBasePath: string
-    apiHost: string
-    apiScheme: string
+    apiBaseUrl : string
     apiToken: string
     bundlePages: boolean,
     contentFieldName: string,

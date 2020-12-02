@@ -44,19 +44,14 @@ $ draaft pull --channel=CHANNEL_ID --dest=content
 
 # Configuration
 
-A configuration file with sensible defaults will be created for you in `.draaft/config.json` when you execute a first command. 
+A configuration file with sensible defaults will be created for you in `.draaft/config.json` when you execute a first command.
+Only the API token will be prompted. 
 
 ```js
 {
-    // "http" or "https"
-    "apiScheme": "https",
-    
-    // The host of the API endpoint
-    "apiHost": "app.pilot.pm",
-
-    // The base path of the API endpoint.
+    // Base url of the API ( scheme + host + base path ).
     // You can change this value to force a specific version of the API. 
-    "apiBasePath": "/integrations/beta",
+    "apiBaseUrl": "https://app.pilot.pm/integrations/beta/",
     
     // The secret API token to authenticate yourself in the API
     "apiToken": "secretToken",

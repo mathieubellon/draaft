@@ -22,13 +22,8 @@ export default class DraaftAPI {
      */
     constructor(config: DraaftConfiguration) {
         this.config = config
-        let baseUrl = url.format({
-            protocol: this.config.apiScheme,
-            host: this.config.apiHost,
-            pathname: this.config.apiBasePath + '/',
-        })
         this.httpclient = axios.create({
-            baseURL: baseUrl,
+            baseURL: config.apiBaseUrl,
             headers: {
                 Authorization: `Token ${config.apiToken}`
             }

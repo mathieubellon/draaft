@@ -1,3 +1,4 @@
+// @ts-ignore
 import {Signale} from 'signale'
 
 const options = {
