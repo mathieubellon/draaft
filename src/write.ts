@@ -1,16 +1,15 @@
-import {CLIError} from '@oclif/errors'
-import * as fs from 'fs-extra'
-import * as path from 'path'
-import chalk from 'chalk'
-import {signal} from './signal'
-
+import { CLIError } from "@oclif/errors"
+import * as fs from "fs-extra"
+import * as path from "path"
+import chalk from "chalk"
+import { signal } from "./signal"
 
 const currentPath = process.cwd()
-export const IMAGE_DIR = path.join(currentPath, 'static', 'img')
+export const IMAGE_DIR = path.join(currentPath, "static", "img")
 
-export function ensureDir(dirPath: string) : void{
+export function ensureDir(dirPath: string): void {
     try {
-        if ( !fs.existsSync(dirPath) ) {
+        if (!fs.existsSync(dirPath)) {
             fs.ensureDirSync(dirPath)
             signal.created(`📁 ${dirPath}`)
         }
@@ -25,7 +24,7 @@ export function createFile(filePath: string, content: string) {
         ensureDir(path.dirname(filePath))
         fs.writeFileSync(filePath, content)
     } catch (error) {
-        signal.fatal('Could not write file', error)
+        signal.fatal("Could not write file", error)
         throw new CLIError(error)
     }
 }
@@ -36,7 +35,7 @@ export function createFileSafe(filePath: string, content: string): void {
             fs.copySync(filePath, `${filePath}.backup`)
             createFile(filePath, content)
         } catch (error) {
-            signal.fatal('Could not create backup file', error)
+            signal.fatal("Could not create backup file", error)
             throw new CLIError(error)
         }
     } else {
@@ -44,7 +43,7 @@ export function createFileSafe(filePath: string, content: string): void {
     }
 }
 
-export function createContentFile(dirPath: string, fileName: string, content: string) : void {
+export function createContentFile(dirPath: string, fileName: string, content: string): void {
     try {
         createFile(path.join(dirPath, fileName), content)
         signal.created(`📄 ${chalk.gray(dirPath)}${path.sep}${fileName}`)
@@ -54,7 +53,7 @@ export function createContentFile(dirPath: string, fileName: string, content: st
     }
 }
 
-export function createImageFile(dirPath: string, imageName: string, axiosResponse: any) : void {
+export function createImageFile(dirPath: string, imageName: string, axiosResponse: any): void {
     try {
         ensureDir(dirPath)
         let writeStream = fs.createWriteStream(path.join(dirPath, imageName))

@@ -1,48 +1,44 @@
-<!doctype html>
+<!DOCTYPE html>
 <html class="no-js" lang="">
-
-<head>
-  <meta charset="utf-8">
-  <title></title>
-  <meta name="description" content="">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- 
+    <head>
+        <meta charset="utf-8" />
+        <title></title>
+        <meta name="description" content="" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <!-- 
   <link rel="manifest" href="site.webmanifest">
   <link rel="apple-touch-icon" href="icon.png"> -->
-  <!-- Place favicon.ico in the root directory -->
+        <!-- Place favicon.ico in the root directory -->
 
-  <link rel="stylesheet" href="/css/normalize.css">
-  <link rel="stylesheet" href="/css/main.css">
+        <link href="/css/normalize.css" rel="stylesheet" />
+        <link href="/css/main.css" rel="stylesheet" />
 
-  <meta name="theme-color" content="#fafafa">
-</head>
+        <meta name="theme-color" content="#fafafa" />
+    </head>
 
-<body>
-  <!--[if IE]>
-    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
-  <![endif]-->
+    <body>
+        <!--[if IE]>
+            <p class="browserupgrade">
+                You are using an <strong>outdated</strong> browser. Please
+                <a href="https://browsehappy.com/">upgrade your browser</a> to improve your
+                experience and security.
+            </p>
+        <![endif]-->
 
-  <!-- Add your site or application content here -->
-  <span  class="nav navbar-nav">
-    {{ template "breadcrumbnav" (dict "p1" . "p2" .) }}
-  </span>
-  {{ define "breadcrumbnav" }}
-  {{ if .p1.Parent }}
-  {{ template "breadcrumbnav" (dict "p1" .p1.Parent "p2" .p2 )  }}
-  {{ else if not .p1.IsHome }}
-  {{ template "breadcrumbnav" (dict "p1" .p1.Site.Home "p2" .p2 )  }}
-  {{ end }}
-  <span{{ if eq .p1 .p2 }} class="active"{{ end }}>
-    <a href="{{ .p1.Permalink }}">{{ .p1.Title }}</a> &bullet;
-  </span>
-  {{ end }}
-  {{ block "main" . }}{{end}}
-  <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID.
+        <!-- Add your site or application content here -->
+        <span class="nav navbar-nav"> {{ template "breadcrumbnav" (dict "p1" . "p2" .) }} </span>
+        {{ define "breadcrumbnav" }} {{ if .p1.Parent }} {{ template "breadcrumbnav" (dict "p1"
+        .p1.Parent "p2" .p2 ) }} {{ else if not .p1.IsHome }} {{ template "breadcrumbnav" (dict "p1"
+        .p1.Site.Home "p2" .p2 ) }} {{ end }}
+        <span class="active" .p1 .p2 {{ {{ }} }} end eq if>
+            <a href="{{ .p1.Permalink }}">{{ .p1.Title }}</a> &bullet;
+        </span>
+        {{ end }} {{ block "main" . }}{{end}}
+        <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID.
   <script>
     window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
     ga('create', 'UA-XXXXX-Y', 'auto'); ga('set','transport','beacon'); ga('send', 'pageview')
   </script>
   <script src="https://www.google-analytics.com/analytics.js" async></script> -->
-</body>
-
+    </body>
 </html>

@@ -1,27 +1,34 @@
-import {flags} from '@oclif/command'
-import {emptyDirSync, ensureDirSync} from 'fs-extra'
-import * as _ from 'lodash'
-import chalk from 'chalk'
-import {BaseCommand} from '../base'
-import {askChannels, askDestDir} from '../prompts'
-import {signal} from '../signal'
-import {Terraformer} from '../terraform'
-import {Channel, ItemsApiResponse} from '../types'
-
+import { flags } from "@oclif/command"
+import { emptyDirSync, ensureDirSync } from "fs-extra"
+import * as _ from "lodash"
+import chalk from "chalk"
+import { BaseCommand } from "../base"
+import { askChannels, askDestDir } from "../prompts"
+import { signal } from "../signal"
+import { Terraformer } from "../terraform"
+import { Channel, ItemsApiResponse } from "../types"
 
 export default class Pull extends BaseCommand {
-    static description = 'Pull content and create files on disk'
+    static description = "Pull content and create files on disk"
 
     static flags = {
-        help: flags.help({char: 'h'}),
-        ssg: flags.string({description: 'Your static site generator.', options: ['hugo', 'gatsby'], default: 'hugo'}),
-        channel: flags.integer({description: 'Channel to pull content from [int]'}),
-        dest: flags.string({description: 'Destination directory where to write files'}),
-        overwrite: flags.boolean({char: 'o', description: 'Empty destination directory before writing', default: false}),
+        help: flags.help({ char: "h" }),
+        ssg: flags.string({
+            description: "Your static site generator.",
+            options: ["hugo", "gatsby"],
+            default: "hugo",
+        }),
+        channel: flags.integer({ description: "Channel to pull content from [int]" }),
+        dest: flags.string({ description: "Destination directory where to write files" }),
+        overwrite: flags.boolean({
+            char: "o",
+            description: "Empty destination directory before writing",
+            default: false,
+        }),
     }
 
     async run() {
-        const {flags} = this.parse(Pull)
+        const { flags } = this.parse(Pull)
 
         let destFolder: string
         if (flags.dest) {
@@ -45,9 +52,13 @@ export default class Pull extends BaseCommand {
         if (flags.overwrite) {
             try {
                 emptyDirSync(destFolder)
-                this.spinner.succeed(`All files deleted in destination directory ${chalk.blue(destFolder)}`)
+                this.spinner.succeed(
+                    `All files deleted in destination directory ${chalk.blue(destFolder)}`,
+                )
             } catch (error) {
-                this.spinner.fail(`Error while cleaning destination directory ${chalk.red(destFolder)}`)
+                this.spinner.fail(
+                    `Error while cleaning destination directory ${chalk.red(destFolder)}`,
+                )
                 signal.fatal(error)
                 this.exit(1)
             }
@@ -58,58 +69,59 @@ export default class Pull extends BaseCommand {
 
         if (flags.channel) {
             // Get channel
-            try{
+            try {
                 let qs = {
                     // Ask the server to serialize the prosemirror description to markdown
-                    format_description: 'markdown'
+                    format_description: "markdown",
                 }
-                this.spinner.start('Get channel')
+                this.spinner.start("Get channel")
                 selectedChannel = await this.api.channelsGetOne(flags.channel, qs)
-                this.spinner.succeed('Channel downloaded')
+                this.spinner.succeed("Channel downloaded")
             } catch (error) {
-                this.spinner.fail('Error while downloading channel')
+                this.spinner.fail("Error while downloading channel")
                 signal.fatal(error)
                 this.exit(1)
             }
-        }
-        else {
+        } else {
             // Get channels list
             try {
                 let qs = {
                     page_size: 100,
                     // Ask the server to serialize the prosemirror description to markdown
-                    format_description: 'markdown'
+                    format_description: "markdown",
                 }
-                this.spinner.start('Get channels list')
+                this.spinner.start("Get channels list")
                 let firstPage = await this.api.channelsGetAll(qs)
                 channelsList = firstPage.objects
-                this.spinner.succeed('Channels list downloaded')
+                this.spinner.succeed("Channels list downloaded")
             } catch (error) {
-                this.spinner.fail('Error while downloading channels list')
+                this.spinner.fail("Error while downloading channels list")
                 signal.fatal(error)
                 this.exit(1)
             }
 
             let answer: any = await askChannels(channelsList)
-            selectedChannel = _.find(channelsList, {id: answer.channel})
+            selectedChannel = _.find(channelsList, { id: answer.channel })
         }
 
-        if( !selectedChannel ){
+        if (!selectedChannel) {
             return
         }
 
         let terraformer = new Terraformer(this.draaftConfig)
 
-        signal.terraforming(chalk.blue('Creating the directory hierarchy'))
+        signal.terraforming(chalk.blue("Creating the directory hierarchy"))
         terraformer.terraformChannel(selectedChannel, destFolder)
 
-        signal.terraforming(chalk.blue('Creating the content files'))
+        signal.terraforming(chalk.blue("Creating the content files"))
         // Get items and write them to disk
-        let page: number|null = 1
+        let page: number | null = 1
         let pageResult: ItemsApiResponse
-        while( page ){
+        while (page) {
             try {
-                this.spinner.start(`Downloading items for channel ${selectedChannel.name} (${selectedChannel.id})`)
+                this.spinner.start(
+                    `Downloading items for channel ${selectedChannel.name} (${selectedChannel.id})`,
+                )
 
                 pageResult = await this.api.itemsGetAll({
                     page: page,
@@ -120,16 +132,16 @@ export default class Pull extends BaseCommand {
                     // increase page size to boost performances
                     page_size: 100,
                     // Ask the server to serialize the prosemirror content to markdown
-                    format_content: 'markdown'
+                    format_content: "markdown",
                 })
-                this.spinner.succeed('Items list downloaded')
+                this.spinner.succeed("Items list downloaded")
 
                 // Write to disk
                 await terraformer.terraformItems(pageResult.objects)
 
                 page = pageResult.next
             } catch (error) {
-                this.spinner.fail('Error while downloading items list')
+                this.spinner.fail("Error while downloading items list")
                 signal.fatal(error)
                 this.exit(1)
             }

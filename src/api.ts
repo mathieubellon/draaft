@@ -1,5 +1,5 @@
-import axios from 'axios'
-import * as url from 'url'
+import axios from "axios"
+import * as url from "url"
 import {
     Channel,
     ChannelsApiResponse,
@@ -7,8 +7,8 @@ import {
     ItemsApiResponse,
     ItemType,
     ItemTypesApiResponse,
-    WorkflowStateApiResponse
-} from './types'
+    WorkflowStateApiResponse,
+} from "./types"
 
 //https://github.com/matt-major/do-wrapper/blob/3bb0d1dbfaa7dc1188a3567321c7def40a8df74a/src/do-wrapper.js#L271
 //https://github.com/matt-major/do-wrapper/blob/3bb0d1dbfaa7dc1188a3567321c7def40a8df74a/src/request-helper.js#L19
@@ -25,15 +25,15 @@ export default class DraaftAPI {
         this.httpclient = axios.create({
             baseURL: config.apiBaseUrl,
             headers: {
-                Authorization: `Token ${config.apiToken}`
-            }
+                Authorization: `Token ${config.apiToken}`,
+            },
         })
     }
 
     async get(endpoint: string, query?: any): Promise<any> {
         let response = await this.httpclient({
             url: endpoint,
-            method: 'GET',
+            method: "GET",
             params: query,
         })
         return response.data
@@ -44,7 +44,7 @@ export default class DraaftAPI {
      * Info {@link https://www.draaft.io/documentation/api/beta/#channels channels}
      */
     channelsGetAll(query: any): Promise<ChannelsApiResponse> {
-        return this.get('channels', query)
+        return this.get("channels", query)
     }
 
     /**
@@ -60,7 +60,7 @@ export default class DraaftAPI {
      * Info {@link https://www.draaft.io/documentation/api/beta/#items items}
      */
     itemsGetAll(query: any): Promise<ItemsApiResponse> {
-        return this.get('items', query)
+        return this.get("items", query)
     }
 
     /**
@@ -68,7 +68,7 @@ export default class DraaftAPI {
      * Info {@link https://www.draaft.io/documentation/api/beta/#workflow workflow}
      */
     workflowGetAll(query: any): Promise<WorkflowStateApiResponse> {
-        return this.get('workflow_states', query)
+        return this.get("workflow_states", query)
     }
 
     /**
@@ -76,7 +76,7 @@ export default class DraaftAPI {
      * Info {@link https://www.draaft.io/documentation/api/beta/#types types}
      */
     typesGetAll(query: any): Promise<ItemTypesApiResponse> {
-        return this.get('item_types', query)
+        return this.get("item_types", query)
     }
 
     /**

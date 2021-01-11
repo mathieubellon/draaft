@@ -1,4 +1,3 @@
-
 export enum FrontmatterFormat {
     yaml = "yaml",
     toml = "toml",
@@ -14,10 +13,10 @@ export enum SSGType {
 }
 
 export type DraaftConfiguration = {
-    apiBaseUrl : string
+    apiBaseUrl: string
     apiToken: string
-    bundlePages: boolean,
-    contentFieldName: string,
+    bundlePages: boolean
+    contentFieldName: string
     frontmatterFormat: FrontmatterFormat
     i18nMode: I18nMode
     i18nDefaultLanguage: string
@@ -36,7 +35,7 @@ export type Channel = {
     id: number
     name: string
     owners: Array<number>
-    state: 'active' | 'closed'
+    state: "active" | "closed"
     type: number
     updated_at: string
     updated_by: number
@@ -45,7 +44,6 @@ export type Channel = {
 export type Item = any
 export type ItemType = any
 export type WorkflowState = any
-
 
 export type PaginatedApiResponse<Type> = {
     num_pages: number

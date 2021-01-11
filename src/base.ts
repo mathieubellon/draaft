@@ -1,15 +1,15 @@
-import Command from '@oclif/command'
-import * as Conf from 'conf'
-import * as _ from 'lodash'
-import * as ora from 'ora'
-import DraaftAPI from './api'
-import {defaultConfiguration} from './config'
-import {DraaftConfiguration} from './types'
+import Command from "@oclif/command"
+import * as Conf from "conf"
+import * as _ from "lodash"
+import * as ora from "ora"
+import DraaftAPI from "./api"
+import { defaultConfiguration } from "./config"
+import { DraaftConfiguration } from "./types"
 
 const conf = new Conf({
-    projectName: 'draaft',
-    configName: 'config',
-    cwd: './.draaft'
+    projectName: "draaft",
+    configName: "config",
+    cwd: "./.draaft",
 })
 
 export abstract class BaseCommand extends Command {
@@ -22,10 +22,10 @@ export abstract class BaseCommand extends Command {
     api: any
 
     async init() {
-        if (!conf.has('apiToken') || conf.get('apiToken') === '') {
-            const {askToken} = require('./prompts')
-            const {apiToken} = await askToken()
-            conf.set('apiToken', apiToken)
+        if (!conf.has("apiToken") || conf.get("apiToken") === "") {
+            const { askToken } = require("./prompts")
+            const { apiToken } = await askToken()
+            conf.set("apiToken", apiToken)
         }
         this.draaftConfig = _.merge(defaultConfiguration, conf.store)
         conf.store = this.draaftConfig

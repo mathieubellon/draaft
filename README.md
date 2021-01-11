@@ -1,7 +1,6 @@
-Draaft
-==========
+# Draaft
 
-Draaft is a command line tool that simply allows you to retrieve content produced on Pilot for statics sites generators. [Pilot](https://pilot.pm) is a content production platform for marketing or communication teams.  
+Draaft is a command line tool that simply allows you to retrieve content produced on Pilot for statics sites generators. [Pilot](https://pilot.pm) is a content production platform for marketing or communication teams.
 
 🚨 ⚠ **Alpha version : This cli is absolutely not production ready and API is subject to changes** ⚠ 🚨
 
@@ -12,11 +11,12 @@ Draaft is a command line tool that simply allows you to retrieve content produce
 [![License](https://img.shields.io/npm/l/draaft.svg)](https://github.com/draaft/cli/blob/master/package.json) -->
 
 <!-- toc -->
-* [Installing](#installing)
-* [Usage](#usage)
-* [Configuration](#configuration)
-* [Commands](#commands)
-* [Roadmap](#roadmap)
+
+-   [Installing](#installing)
+-   [Usage](#usage)
+-   [Configuration](#configuration)
+-   [Commands](#commands)
+-   [Roadmap](#roadmap)
 <!-- tocstop -->
 
 # Installing
@@ -36,26 +36,28 @@ $ yarn global add draaft
 # Usage
 
 <!-- usage -->
+
 ```bash
 $ draaft layout
 $ draaft pull --channel=CHANNEL_ID --dest=content
 ```
+
 <!-- usagestop -->
 
 # Configuration
 
 A configuration file with sensible defaults will be created for you in `.draaft/config.json` when you execute a first command.
-Only the API token will be prompted. 
+Only the API token will be prompted.
 
 ```js
 {
     // Base url of the API ( scheme + host + base path ).
-    // You can change this value to force a specific version of the API. 
+    // You can change this value to force a specific version of the API.
     "apiBaseUrl": "https://app.pilot.pm/integrations/beta/",
-    
+
     // The secret API token to authenticate yourself in the API
     "apiToken": "secretToken",
-	   
+
     // Should we make page bundles ?
     // If `true`, draaft will create a bundle for each item, containing the content and resources (images).
     // If `false`, all the resources will be created in the `/static/` directory
@@ -63,7 +65,7 @@ Only the API token will be prompted.
 
     // The name of the field in `Item.content` that will be used for the page content.
     "contentFieldName": "body",
-    
+
     // How should we serialize the frontmatter ?
     // Allowed values : "yaml" | "toml"
     "frontmatterFormat": "yaml"
@@ -79,7 +81,7 @@ Only the API token will be prompted.
     // If `true`, draaft will create all files into `/[destDir]/[channel.name]/`
     // If `false`, draaft will create all files into `/[destDir]/`
     "useChannelName": false,
-    
+
     //Target Static Site Generator.
     // For now, only "hugo" is supported
     "ssg": "hugo"
@@ -89,11 +91,12 @@ Only the API token will be prompted.
 # Commands
 
 <!-- commands -->
-* [`draaft help [COMMAND]`](#draaft-help-command)
-* [`draaft layout`](#draaft-layout)
-* [`draaft pull`](#draaft-pull)
-* [`draaft states`](#draaft-states)
-* [`draaft types [ID]`](#draaft-types-id)
+
+-   [`draaft help [COMMAND]`](#draaft-help-command)
+-   [`draaft layout`](#draaft-layout)
+-   [`draaft pull`](#draaft-pull)
+-   [`draaft states`](#draaft-states)
+-   [`draaft types [ID]`](#draaft-types-id)
 
 ## `draaft help [COMMAND]`
 
@@ -181,24 +184,30 @@ OPTIONS
 ```
 
 _See code: [src\commands\types.ts](https://github.com/hbyio/draaft/blob/v0.0.1-alpha2/src\commands\types.ts)_
+
 <!-- commandsstop -->
 
 # Roadmap
 
 ## Alpha
-- [x] Get content from channel
-- [x] hugo.io : Create _index.file for sections
-- [x] generate basic Hugo layout
-- [x] Data mapper : let user map Draaft response keys to Frontmatter (use Hugo archetype maybe)
-- [X] Generate page bundles
-- [X] Basic documentation
+
+-   [x] Get content from channel
+-   [x] hugo.io : Create \_index.file for sections
+-   [x] generate basic Hugo layout
+-   [x] Data mapper : let user map Draaft response keys to Frontmatter (use Hugo archetype maybe)
+-   [x] Generate page bundles
+-   [x] Basic documentation
+
 ## Beta
-- [ ] Generate data files for complex layout (eg. home page)
-- [ ] Option : Flat layout (with frontmatter menu infos + hierarchy)
-- [ ] Option : Merge frontmatter
-- [ ] hugo.io : i18n support
-- [ ] Select which pilot.pm workflow state map with the "draft" frontmatter key in Hugo
+
+-   [ ] Generate data files for complex layout (eg. home page)
+-   [ ] Option : Flat layout (with frontmatter menu infos + hierarchy)
+-   [ ] Option : Merge frontmatter
+-   [ ] hugo.io : i18n support
+-   [ ] Select which pilot.pm workflow state map with the "draft" frontmatter key in Hugo
+
 ## V1.0.0
-- [ ] Support Gatsby
-- [ ] Generate complete layout for Hugo and Gatsby with theme selector
-- [ ] Tests
+
+-   [ ] Support Gatsby
+-   [ ] Generate complete layout for Hugo and Gatsby with theme selector
+-   [ ] Tests

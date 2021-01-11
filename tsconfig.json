@@ -10,7 +10,5 @@
         "composite": true,
         "lib": ["es2020.string"]
     },
-    "include": [
-        "src/**/*"
-    ]
+    "include": ["src/**/*"]
 }

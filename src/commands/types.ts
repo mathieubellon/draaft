@@ -1,25 +1,26 @@
-import {flags} from '@oclif/command'
-import * as yaml from 'js-yaml'
-import * as path from 'path'
-import chalk from 'chalk'
-import {BaseCommand} from '../base'
-import {signal} from '../signal'
-import {createFile, createFileSafe} from '../write'
+import { flags } from "@oclif/command"
+import * as yaml from "js-yaml"
+import * as path from "path"
+import chalk from "chalk"
+import { BaseCommand } from "../base"
+import { signal } from "../signal"
+import { createFile, createFileSafe } from "../write"
 
 export default class Types extends BaseCommand {
-    static description = 'List all item types'
+    static description = "List all item types"
 
     static flags = {
-        help: flags.help({char: 'h'}),
+        help: flags.help({ char: "h" }),
         // flag with no value (-f, --force)
-        schema: flags.boolean({char: 'w', description: 'Display content schema for each type'}),
-        save: flags.boolean({char: 's', description: 'Save content shema as file for customisation'}),
-        backup: flags.boolean({char: 'b', description: 'If file exists create backup'}),
+        schema: flags.boolean({ char: "w", description: "Display content schema for each type" }),
+        save: flags.boolean({
+            char: "s",
+            description: "Save content shema as file for customisation",
+        }),
+        backup: flags.boolean({ char: "b", description: "If file exists create backup" }),
     }
 
-    static args = [
-        {name: 'id', description: 'ID of type', required: false}
-    ]
+    static args = [{ name: "id", description: "ID of type", required: false }]
 
     purgeType(srcType: any) {
         let purgedType: any = {}
@@ -32,7 +33,7 @@ export default class Types extends BaseCommand {
 
             neovalue.fm_show = true
             neovalue.fm_key = element.name
-            if (element.name === 'body') {
+            if (element.name === "body") {
                 neovalue.fm_show = false
             }
             purgedType.content_schema[element.name] = neovalue
@@ -42,7 +43,7 @@ export default class Types extends BaseCommand {
 
     saveTypeToDisk(contentType: any, backup = false) {
         let yaml2write = yaml.safeDump(this.purgeType(contentType))
-        let writePath = path.join(process.cwd(), '.draaft', `type-${contentType.id}.yml`)
+        let writePath = path.join(process.cwd(), ".draaft", `type-${contentType.id}.yml`)
         if (backup) {
             createFileSafe(writePath, yaml2write)
         } else {
@@ -51,7 +52,7 @@ export default class Types extends BaseCommand {
     }
 
     async run() {
-        const {flags, args} = this.parse(Types)
+        const { flags, args } = this.parse(Types)
         let typesList = []
 
         // Get item types list
@@ -64,19 +65,21 @@ export default class Types extends BaseCommand {
                     this.saveTypeToDisk(typesList[0], flags.backup)
                 }
             } catch (error) {
-                this.spinner.fail('Error while downloading item type')
+                this.spinner.fail("Error while downloading item type")
                 signal.fatal(error)
                 this.exit(1)
             }
         } else {
             try {
-                this.spinner.start('Get item types list')
+                this.spinner.start("Get item types list")
                 let firstPage = await this.api.typesGetAll()
                 typesList = firstPage.objects
-                this.spinner.succeed('item types list downloaded')
-                this.log('This list represents all item types created by the user \n ===================')
+                this.spinner.succeed("item types list downloaded")
+                this.log(
+                    "This list represents all item types created by the user \n ===================",
+                )
             } catch (error) {
-                this.spinner.fail('Error while downloading item types list')
+                this.spinner.fail("Error while downloading item types list")
                 signal.fatal(error)
                 this.exit(1)
             }
@@ -85,8 +88,10 @@ export default class Types extends BaseCommand {
             this.log(`📐  ${type.name} [id:${type.id}]`)
             if (flags.schema) {
                 type.content_schema.forEach((field: any) => {
-                    let required = field.required ? 'required' : ''
-                    this.log(`    ${field.name} ${chalk.yellow(field.type)} ${chalk.gray(required)}`)
+                    let required = field.required ? "required" : ""
+                    this.log(
+                        `    ${field.name} ${chalk.yellow(field.type)} ${chalk.gray(required)}`,
+                    )
                 })
             }
         }

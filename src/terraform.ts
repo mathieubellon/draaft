@@ -1,15 +1,22 @@
-import axios from 'axios'
-import * as fs from 'fs-extra'
-import * as matter from 'gray-matter'
-import * as yaml from 'js-yaml'
-import * as _ from 'lodash'
-import * as path from 'path'
-import * as toml from '@iarna/toml'
-import slugify from '@sindresorhus/slugify'
-import {signal} from './signal'
-import {Channel, ChannelHierarchy, DraaftConfiguration, I18nMode, Item, SSGType, FrontmatterFormat} from './types'
-import * as write from './write'
-
+import axios from "axios"
+import * as fs from "fs-extra"
+import * as matter from "gray-matter"
+import * as yaml from "js-yaml"
+import * as _ from "lodash"
+import * as path from "path"
+import * as toml from "@iarna/toml"
+import slugify from "@sindresorhus/slugify"
+import { signal } from "./signal"
+import {
+    Channel,
+    ChannelHierarchy,
+    DraaftConfiguration,
+    I18nMode,
+    Item,
+    SSGType,
+    FrontmatterFormat,
+} from "./types"
+import * as write from "./write"
 
 const MARKDOWN_IMAGE_REGEX = /!\[[^\]]*\]\((?<filename>.*?)(?=\"|\))(?<optionalpart>\".*\")?\)/g
 
@@ -18,11 +25,11 @@ let itemFoldersMap: Record<number, string> = {}
 const matterEngines = {
     toml: {
         parse: (input: string) => toml.parse(input),
-        stringify:  (data: object) => toml.stringify(<toml.JsonMap> data),
-    }
+        stringify: (data: object) => toml.stringify(<toml.JsonMap>data),
+    },
 }
 
-export class Terraformer{
+export class Terraformer {
     config: DraaftConfiguration
 
     /**
@@ -33,21 +40,20 @@ export class Terraformer{
         this.config = config
     }
 
-    matterize(content: string, frontmatter: Object){
+    matterize(content: string, frontmatter: Object) {
         return matter.stringify(content, frontmatter, {
             language: this.config.frontmatterFormat,
             engines: matterEngines,
-            delimiters: this.config.frontmatterFormat == FrontmatterFormat.toml ? '+++' : '---'
+            delimiters: this.config.frontmatterFormat == FrontmatterFormat.toml ? "+++" : "---",
         })
     }
 
     terraformChannel(channel: Channel, parentPath: string): void {
         let channelDirPath
-        if( this.config.useChannelName ){
+        if (this.config.useChannelName) {
             let channelSlug = slugify(channel.name)
             channelDirPath = path.join(parentPath, channelSlug)
-        }
-        else{
+        } else {
             channelDirPath = parentPath
         }
 
@@ -63,23 +69,23 @@ export class Terraformer{
             delete frontmatter.children
         }
         let indexContent = this.matterize(String(frontmatter.description), frontmatter)
-        write.createContentFile(channelDirPath, '_index.md', indexContent)
+        write.createContentFile(channelDirPath, "_index.md", indexContent)
 
         this.writeChannelHierarchy(channel.hierarchy, channelDirPath)
     }
 
-    writeChannelHierarchy(hierarchy: ChannelHierarchy, parentDirPath: string) : void{
-        for( let node of hierarchy ){
-            if( node.type == 'folder' ){
+    writeChannelHierarchy(hierarchy: ChannelHierarchy, parentDirPath: string): void {
+        for (let node of hierarchy) {
+            if (node.type == "folder") {
                 let folderPath = path.join(parentDirPath, slugify(node.name))
                 write.ensureDir(folderPath)
-                let indexContent = this.matterize(node.name, {title: node.name})
-                write.createContentFile(folderPath, '_index.md', indexContent)
+                let indexContent = this.matterize(node.name, { title: node.name })
+                write.createContentFile(folderPath, "_index.md", indexContent)
 
                 this.writeChannelHierarchy(node.nodes, folderPath)
             }
 
-            if( node.type == 'item' ){
+            if (node.type == "item") {
                 itemFoldersMap[node.id] = parentDirPath
             }
         }
@@ -91,7 +97,7 @@ export class Terraformer{
      *
      * @param items : List of items attached to this channel
      */
-    async terraformItems(items: Array<Item>) : Promise<void> {
+    async terraformItems(items: Array<Item>): Promise<void> {
         // Currently we write synchronously to have a nice indented terminal output for user, trading speed for UX.
         // TODO : Build a report object from async calls to have best of both world.
         for (let item of items) {
@@ -104,9 +110,9 @@ export class Terraformer{
         }
     }
 
-    async terraformOneItem(item: Item) : Promise<void> {
+    async terraformOneItem(item: Item): Promise<void> {
         let itemFolder = itemFoldersMap[item.id]
-        if( !itemFolder ){
+        if (!itemFolder) {
             throw `Item ${item.id} has no correspondence in the hierarchy`
         }
 
@@ -125,20 +131,22 @@ export class Terraformer{
     getItemDirPath(parentFolder: string, item: Item): string {
         let itemDirPath = parentFolder
         // first level directory may be 'en' or 'fr' if user decides so
-        if ( this.config.i18nMode === I18nMode.directory) {
+        if (this.config.i18nMode === I18nMode.directory) {
             // fr_FR -> fr
-            let languageCode = item.language ? item.language.split('_')[0] : this.config.i18nDefaultLanguage
+            let languageCode = item.language
+                ? item.language.split("_")[0]
+                : this.config.i18nDefaultLanguage
             itemDirPath = path.join(itemDirPath, languageCode)
         }
 
-        if( this.config.bundlePages ){
-            itemDirPath = path.join(itemDirPath,  this.getItemSlug(item))
+        if (this.config.bundlePages) {
+            itemDirPath = path.join(itemDirPath, this.getItemSlug(item))
         }
 
         return itemDirPath
     }
 
-    getItemSlug(item: Item){
+    getItemSlug(item: Item) {
         return item.title ? `${item.id}-${slugify(item.title)}` : `${item.id}-notitle`
     }
 
@@ -149,13 +157,13 @@ export class Terraformer{
      * @param options : Extension configuration object
      */
     getItemFileName(item: Item): string {
-        let itemFileName = this.config.bundlePages ? 'index' : this.getItemSlug(item)
+        let itemFileName = this.config.bundlePages ? "index" : this.getItemSlug(item)
 
-        if ( this.config.i18nMode === I18nMode.filename && item.language) {
-            let languageCode = item.language.split('_')[0] // fr_FR -> fr
-            itemFileName = itemFileName + '.' + languageCode + '.md'
+        if (this.config.i18nMode === I18nMode.filename && item.language) {
+            let languageCode = item.language.split("_")[0] // fr_FR -> fr
+            itemFileName = itemFileName + "." + languageCode + ".md"
         } else {
-            itemFileName = itemFileName + '.md'
+            itemFileName = itemFileName + ".md"
         }
 
         return itemFileName
@@ -169,10 +177,10 @@ export class Terraformer{
     async getItemFileContent(item: any, itemDirPath: string): Promise<string> {
         // Everything from document is in frontmatter (for now, may be updated downwards)
         let frontmatter = _.cloneDeep(item)
-        let markdown = ''
+        let markdown = ""
 
         // If we have a content field, use it for markdown source
-        if ( item.content.hasOwnProperty(this.config.contentFieldName) ){
+        if (item.content.hasOwnProperty(this.config.contentFieldName)) {
             markdown = item.content[this.config.contentFieldName]
             markdown = await this.fetchImages(markdown, itemDirPath)
         }
@@ -181,11 +189,11 @@ export class Terraformer{
         let typeFilePath = `.draaft/type-${frontmatter.item_type}.yml`
         let typefile: any
         if (fs.existsSync(typeFilePath)) {
-            typefile = yaml.safeLoad(fs.readFileSync(typeFilePath, 'utf8'))
+            typefile = yaml.safeLoad(fs.readFileSync(typeFilePath, "utf8"))
         }
 
         if (typefile && typefile.content_schema) {
-            signal.success('Custom type file found, using it')
+            signal.success("Custom type file found, using it")
             this.customiseFrontmatter(frontmatter, typefile.content_schema)
         } else {
             this.customiseFrontmatter(frontmatter)
@@ -236,27 +244,26 @@ export class Terraformer{
         return frontmatter
     }
 
-    async fetchImages(markdown: string, itemDirPath: string): Promise<string>{
+    async fetchImages(markdown: string, itemDirPath: string): Promise<string> {
         let imagePromises = []
 
-        for( let match of markdown.matchAll(MARKDOWN_IMAGE_REGEX) ){
-            if( !match.groups || !match.groups.filename){
+        for (let match of markdown.matchAll(MARKDOWN_IMAGE_REGEX)) {
+            if (!match.groups || !match.groups.filename) {
                 continue
             }
 
             let imageUrl = match.groups.filename.trim()
-            let imageName = imageUrl.split('/').slice(-1)[0]
+            let imageName = imageUrl.split("/").slice(-1)[0]
             // If we're bundling images with content, we use a relative ref.
             // Else, we'll put it into the statics directory, and use an absolute ref.
-            let imageRefInMarkdown = this.config.bundlePages ? imageName : ('/img/' + imageName)
+            let imageRefInMarkdown = this.config.bundlePages ? imageName : "/img/" + imageName
             markdown = markdown.replace(imageUrl, imageRefInMarkdown)
 
-            let imagePromise = axios.get(imageUrl, {responseType: 'stream'})
-            .then(response => {
+            let imagePromise = axios.get(imageUrl, { responseType: "stream" }).then((response) => {
                 // If we're bundling images with content, we use the page bundle directory.
                 // Else, we use the static directory.
-                let imageDir =  this.config.bundlePages ? itemDirPath : write.IMAGE_DIR
-                write.createImageFile(imageDir, imageName,  response)
+                let imageDir = this.config.bundlePages ? itemDirPath : write.IMAGE_DIR
+                write.createImageFile(imageDir, imageName, response)
             })
             imagePromises.push(imagePromise)
         }

@@ -1,38 +1,38 @@
-import {Command, flags} from '@oclif/command'
-import {CLIError} from '@oclif/errors'
-import * as fs from 'fs'
-import {ensureDirSync} from 'fs-extra'
-import * as path from 'path'
-import {signal} from '../signal'
+import { Command, flags } from "@oclif/command"
+import { CLIError } from "@oclif/errors"
+import * as fs from "fs"
+import { ensureDirSync } from "fs-extra"
+import * as path from "path"
+import { signal } from "../signal"
 
 export default class Layout extends Command {
-    static description = 'Create basic layout to display content'
+    static description = "Create basic layout to display content"
 
     static flags = {
-        help: flags.help({char: 'h'}),
+        help: flags.help({ char: "h" }),
         // flag with a value (-n, --name=VALUE)
-        ssg: flags.string({char: 's', description: 'Static site generator'}),
+        ssg: flags.string({ char: "s", description: "Static site generator" }),
         // flag with no value (-f, --force)
-        overwrite: flags.boolean({char: 'f', default: false}),
+        overwrite: flags.boolean({ char: "f", default: false }),
     }
 
     async run() {
         //const {args, flags} = this.parse(Layout)
         const CURR_DIR = process.cwd()
-        const templatePath = path.join(__dirname, '../', 'templates', 'hugo')
+        const templatePath = path.join(__dirname, "../", "templates", "hugo")
 
         function createDirectoryContents(templatePath: string, CURR_DIR: string) {
             const filesToCreate = fs.readdirSync(templatePath)
-            filesToCreate.forEach(file => {
+            filesToCreate.forEach((file) => {
                 const origFilePath = `${templatePath}/${file}`
                 // get stats about the current file
                 const stats = fs.statSync(origFilePath)
                 if (stats.isFile()) {
-                    const contents = fs.readFileSync(origFilePath, 'utf8')
+                    const contents = fs.readFileSync(origFilePath, "utf8")
                     //console.log('reader', contents)
                     const writePath = `${CURR_DIR}/${file}`
                     try {
-                        fs.writeFileSync(writePath, contents, 'utf8')
+                        fs.writeFileSync(writePath, contents, "utf8")
                         signal.created(`📄 ${writePath}`)
                     } catch (error) {
                         signal.fatal(error)
