@@ -43,7 +43,13 @@ export type Channel = {
 
 export type Item = any
 export type ItemType = any
-export type WorkflowState = any
+
+export type WorkflowState = {
+    color: string
+    id: number
+    label: string
+    order: number
+}
 
 export type PaginatedApiResponse<Type> = {
     num_pages: number

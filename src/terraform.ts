@@ -31,13 +31,15 @@ const matterEngines = {
 
 export class Terraformer {
     config: DraaftConfiguration
+    publicationStateIds: number[]
 
     /**
      * Terraform pilot content to SSG content
      * @param config - Draaft configuration
      */
-    constructor(config: DraaftConfiguration) {
+    constructor(config: DraaftConfiguration, publicationStateIds: number[]) {
         this.config = config
+        this.publicationStateIds = publicationStateIds
     }
 
     matterize(content: string, frontmatter: Object) {
@@ -240,6 +242,9 @@ export class Terraformer {
         if (frontmatter.master_translation) {
             frontmatter.translationKey = frontmatter.master_translation
         }
+
+        // Is it  published  or draft ?
+        frontmatter.draft = !this.publicationStateIds.includes(frontmatter.workflow_state)
 
         return frontmatter
     }

@@ -1,9 +1,8 @@
 import { flags } from "@oclif/command"
 import { emptyDirSync, ensureDirSync } from "fs-extra"
-import * as _ from "lodash"
 import chalk from "chalk"
 import { BaseCommand } from "../base"
-import { askChannels, askDestDir } from "../prompts"
+import { askChannels, askDestDir, askPublicationStates } from "../prompts"
 import { signal } from "../signal"
 import { Terraformer } from "../terraform"
 import { Channel, ItemsApiResponse } from "../types"
@@ -18,11 +17,15 @@ export default class Pull extends BaseCommand {
             options: ["hugo", "gatsby"],
             default: "hugo",
         }),
+        dest: flags.string({ description: "Destination directory where to write files" }),
         channel: flags.integer({
-            description: "Channel to pull content from [int]",
+            description: "[int] [multiple] Channel to pull content from",
             multiple: true,
         }),
-        dest: flags.string({ description: "Destination directory where to write files" }),
+        publicationState: flags.integer({
+            description: "[int] [multiple] workflow state for a published content",
+            multiple: true,
+        }),
         overwrite: flags.boolean({
             char: "o",
             description: "Empty destination directory before writing",
@@ -32,6 +35,10 @@ export default class Pull extends BaseCommand {
 
     async run() {
         const { flags } = this.parse(Pull)
+
+        /********************
+         * Destination Folder
+         ********************/
 
         let destFolder: string
         if (flags.dest) {
@@ -67,19 +74,22 @@ export default class Pull extends BaseCommand {
             }
         }
 
+        /********************
+         * Channels
+         ********************/
+
         let channelsList: Channel[] = []
         let selectedChannelIds: number[]
         let selectedChannels: Channel[]
 
         // Get channels list
         try {
-            let qs = {
+            this.spinner.start("Get channels list")
+            let firstPage = await this.api.channelsGetAll({
                 page_size: 100,
                 // Ask the server to serialize the prosemirror description to markdown
                 format_description: "markdown",
-            }
-            this.spinner.start("Get channels list")
-            let firstPage = await this.api.channelsGetAll(qs)
+            })
             channelsList = firstPage.objects
             this.spinner.succeed("Channels list downloaded")
         } catch (error) {
@@ -101,7 +111,40 @@ export default class Pull extends BaseCommand {
             .map((channelId) => channelsList.find((channel) => channel.id == channelId))
             .filter((channel): channel is Channel => channel != undefined)
 
-        let terraformer = new Terraformer(this.draaftConfig)
+        if (selectedChannels.length == 0) {
+            return
+        }
+
+        /********************
+         * Publication state
+         ********************/
+
+        let publicationStateIds
+
+        if (flags.publicationState) {
+            publicationStateIds = flags.publicationState
+        } else {
+            let statesList = []
+            try {
+                this.spinner.start("Get workflow states list")
+                let firstPage = await this.api.workflowGetAll()
+                statesList = firstPage.objects
+                this.spinner.succeed("Workflow states list downloaded")
+            } catch (error) {
+                this.spinner.fail("Error while downloading workflow states list")
+                signal.fatal(error)
+                this.exit(1)
+            }
+
+            let answer: any = await askPublicationStates(statesList)
+            publicationStateIds = answer.workflowState
+        }
+
+        /********************
+         * Terraforming
+         ********************/
+
+        let terraformer = new Terraformer(this.draaftConfig, publicationStateIds)
 
         for (let selectedChannel of selectedChannels) {
             signal.terraforming(

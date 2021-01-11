@@ -1,18 +1,10 @@
 import { prompt, registerPrompt } from "inquirer"
 import * as _ from "lodash"
-import { Channel } from "./types"
+import { Channel, WorkflowState } from "./types"
 
 registerPrompt("fuzzypath", require("inquirer-fuzzy-path"))
 
-export const confirmAction = (confirmMessage = "Are you sure ?") => {
-    return prompt({
-        type: "confirm",
-        name: "confirm",
-        message: confirmMessage,
-    })
-}
-
-export const askToken = () => {
+export function askToken() {
     return prompt({
         type: "password",
         name: "apiToken",
@@ -23,20 +15,45 @@ export const askToken = () => {
 
 /**
  * Ask user which channel to pull content from
- * @param {string} channels - Channels list
+ * @param {string} channelsList - Channels list
  * @returns {*}
  */
-export const askChannels = (channels: Channel[]): Promise<{ channel: number[] }> => {
-    let choices = _.map(channels, (elt) => {
+export function askChannels(channelsList: Channel[]): Promise<{ channel: number[] }> {
+    let choices = _.map(channelsList, (channel) => {
         return {
-            name: elt.name,
-            value: elt.id,
+            name: channel.name,
+            value: channel.id,
         }
     })
     return prompt([
         {
             name: "channel",
             message: "Select channels to pull content from\n",
+            type: "checkbox",
+            choices: choices,
+        },
+    ])
+}
+
+/**
+ * Ask user which workflow states should define a content as published ( draft = false )
+ * @param {string} statesList - WorkflowState list
+ * @returns {*}
+ */
+export function askPublicationStates(
+    statesList: WorkflowState[],
+): Promise<{ workflowState: number[] }> {
+    console.log(statesList[0])
+    let choices = _.map(statesList, (state) => {
+        return {
+            name: state.label,
+            value: state.id,
+        }
+    })
+    return prompt([
+        {
+            name: "workflowState",
+            message: "Select which workflow state to use for publication\n",
             type: "checkbox",
             choices: choices,
         },
