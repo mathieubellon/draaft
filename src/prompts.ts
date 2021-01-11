@@ -26,7 +26,7 @@ export const askToken = () => {
  * @param {string} channels - Channels list
  * @returns {*}
  */
-export const askChannels = (channels: Channel[]) => {
+export const askChannels = (channels: Channel[]): Promise<{ channel: number[] }> => {
     let choices = _.map(channels, (elt) => {
         return {
             name: elt.name,
@@ -36,8 +36,8 @@ export const askChannels = (channels: Channel[]) => {
     return prompt([
         {
             name: "channel",
-            message: "Select a channel to pull content from\n",
-            type: "list",
+            message: "Select channels to pull content from\n",
+            type: "checkbox",
             choices: choices,
         },
     ])
@@ -51,7 +51,7 @@ export const askDestDir = () => {
             // @ts-ignore
             excludePath: (nodePath) =>
                 nodePath.startsWith(".git") ||
-                nodePath.startsWith("node") ||
+                nodePath.startsWith("node_modules") ||
                 nodePath.startsWith(".draaft"),
             // excludePath :: (String) -> Bool
             // excludePath to exclude some paths from the file-system scan

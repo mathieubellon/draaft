@@ -18,7 +18,10 @@ export default class Pull extends BaseCommand {
             options: ["hugo", "gatsby"],
             default: "hugo",
         }),
-        channel: flags.integer({ description: "Channel to pull content from [int]" }),
+        channel: flags.integer({
+            description: "Channel to pull content from [int]",
+            multiple: true,
+        }),
         dest: flags.string({ description: "Destination directory where to write files" }),
         overwrite: flags.boolean({
             char: "o",
@@ -65,85 +68,81 @@ export default class Pull extends BaseCommand {
         }
 
         let channelsList: Channel[] = []
-        let selectedChannel: Channel | undefined
+        let selectedChannelIds: number[]
+        let selectedChannels: Channel[]
 
+        // Get channels list
+        try {
+            let qs = {
+                page_size: 100,
+                // Ask the server to serialize the prosemirror description to markdown
+                format_description: "markdown",
+            }
+            this.spinner.start("Get channels list")
+            let firstPage = await this.api.channelsGetAll(qs)
+            channelsList = firstPage.objects
+            this.spinner.succeed("Channels list downloaded")
+        } catch (error) {
+            this.spinner.fail("Error while downloading channels list")
+            signal.fatal(error)
+            this.exit(1)
+        }
+
+        // Figure out which channel ids the user want to terraform
         if (flags.channel) {
-            // Get channel
-            try {
-                let qs = {
-                    // Ask the server to serialize the prosemirror description to markdown
-                    format_description: "markdown",
-                }
-                this.spinner.start("Get channel")
-                selectedChannel = await this.api.channelsGetOne(flags.channel, qs)
-                this.spinner.succeed("Channel downloaded")
-            } catch (error) {
-                this.spinner.fail("Error while downloading channel")
-                signal.fatal(error)
-                this.exit(1)
-            }
+            selectedChannelIds = flags.channel
         } else {
-            // Get channels list
-            try {
-                let qs = {
-                    page_size: 100,
-                    // Ask the server to serialize the prosemirror description to markdown
-                    format_description: "markdown",
-                }
-                this.spinner.start("Get channels list")
-                let firstPage = await this.api.channelsGetAll(qs)
-                channelsList = firstPage.objects
-                this.spinner.succeed("Channels list downloaded")
-            } catch (error) {
-                this.spinner.fail("Error while downloading channels list")
-                signal.fatal(error)
-                this.exit(1)
-            }
-
-            let answer: any = await askChannels(channelsList)
-            selectedChannel = _.find(channelsList, { id: answer.channel })
+            let answer = await askChannels(channelsList)
+            selectedChannelIds = answer.channel
         }
 
-        if (!selectedChannel) {
-            return
-        }
+        // Find the corresponding channels, and remove ids without correspondence
+        selectedChannels = selectedChannelIds
+            .map((channelId) => channelsList.find((channel) => channel.id == channelId))
+            .filter((channel): channel is Channel => channel != undefined)
 
         let terraformer = new Terraformer(this.draaftConfig)
 
-        signal.terraforming(chalk.blue("Creating the directory hierarchy"))
-        terraformer.terraformChannel(selectedChannel, destFolder)
+        for (let selectedChannel of selectedChannels) {
+            signal.terraforming(
+                chalk.magenta(
+                    `Terrraforming channel ${selectedChannel.name} (${selectedChannel.id})`,
+                ),
+            )
 
-        signal.terraforming(chalk.blue("Creating the content files"))
-        // Get items and write them to disk
-        let page: number | null = 1
-        let pageResult: ItemsApiResponse
-        while (page) {
-            try {
-                this.spinner.start(
-                    `Downloading items for channel ${selectedChannel.name} (${selectedChannel.id})`,
-                )
+            signal.terraforming(chalk.blue("Creating the directory hierarchy"))
+            terraformer.terraformChannel(selectedChannel, destFolder)
 
-                pageResult = await this.api.itemsGetAll({
-                    page: page,
-                    // Filter on the current channel
-                    channels: selectedChannel.id,
-                    // Expand the translation items
-                    // expand: 'translations',
-                    // increase page size to boost performances
-                    page_size: 100,
-                    // Ask the server to serialize the prosemirror content to markdown
-                    format_content: "markdown",
-                })
-                this.spinner.succeed("Items list downloaded")
+            signal.terraforming(chalk.blue("Creating the content files"))
+            // Get items and write them to disk
+            let page: number | null = 1
+            let pageResult: ItemsApiResponse
+            while (page) {
+                try {
+                    this.spinner.start(`Downloading items`)
 
-                // Write to disk
-                await terraformer.terraformItems(pageResult.objects)
+                    pageResult = await this.api.itemsGetAll({
+                        page: page,
+                        // Filter on the current channel
+                        channels: selectedChannel.id,
+                        // Expand the translation items
+                        // expand: 'translations',
+                        // increase page size to boost performances
+                        page_size: 100,
+                        // Ask the server to serialize the prosemirror content to markdown
+                        format_content: "markdown",
+                    })
+                    this.spinner.succeed("Items list downloaded")
 
-                page = pageResult.next
-            } catch (error) {
-                this.spinner.fail("Error while downloading items list")
-                signal.fatal(error)
-                this.exit(1)
+                    // Write to disk
+                    await terraformer.terraformItems(pageResult.objects)
+
+                    page = pageResult.next
+                } catch (error) {
+                    this.spinner.fail("Error while downloading items list")
+                    signal.fatal(error)
+                    this.exit(1)
+                }
             }
         }
     }
