@@ -71,7 +71,7 @@ export class Terraformer{
     writeChannelHierarchy(hierarchy: ChannelHierarchy, parentDirPath: string) : void{
         for( let node of hierarchy ){
             if( node.type == 'folder' ){
-                let folderPath = path.join(parentDirPath, node.name)
+                let folderPath = path.join(parentDirPath, slugify(node.name))
                 write.ensureDir(folderPath)
                 let indexContent = this.matterize(node.name, {title: node.name})
                 write.createContentFile(folderPath, '_index.md', indexContent)
