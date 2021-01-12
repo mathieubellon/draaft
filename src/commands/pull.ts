@@ -147,6 +147,7 @@ export default class Pull extends BaseCommand {
         try {
             this.spinner.start("Get channels list")
             let firstPage = await this.api.channelsGetAll({
+                state: "active",
                 page_size: 100,
                 // Ask the server to serialize the prosemirror description to markdown
                 format_description: "markdown",
