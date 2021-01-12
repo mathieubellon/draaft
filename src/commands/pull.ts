@@ -1,11 +1,16 @@
 import { flags } from "@oclif/command"
-import { emptyDirSync, ensureDirSync } from "fs-extra"
+import { OutputFlags } from "@oclif/parser"
+import * as fs from "fs-extra"
+import * as path from "path"
 import chalk from "chalk"
+
 import { BaseCommand } from "../base"
 import { askChannels, askDestDir, askPublicationStates } from "../prompts"
 import { signal } from "../signal"
 import { Terraformer } from "../terraform"
-import { Channel, ItemsApiResponse } from "../types"
+import { Channel, ContentSource, ItemsApiResponse } from "../types"
+
+const CONTENT_SOURCE_FILE_NAME = ".draaft.source.json"
 
 export default class Pull extends BaseCommand {
     static description = "Pull content and create files on disk"
@@ -33,55 +38,111 @@ export default class Pull extends BaseCommand {
         }),
     }
 
+    parsedFlags!: OutputFlags<typeof Pull.flags>
+    destFolder!: string
+    channelsList!: Channel[]
+    selectedChannelIds!: number[]
+    selectedChannels!: Channel[]
+    publicationStateIds!: number[]
+
     async run() {
         const { flags } = this.parse(Pull)
+        this.parsedFlags = flags
 
-        /********************
-         * Destination Folder
-         ********************/
+        await this.seekDestFolder()
 
-        let destFolder: string
-        if (flags.dest) {
-            destFolder = flags.dest
+        let contentSourceFilePath = path.join(this.destFolder, CONTENT_SOURCE_FILE_NAME)
+        if (fs.existsSync(contentSourceFilePath)) {
+            this.loadSourceFile(contentSourceFilePath)
+            await this.fetchChannelsList()
+        } else {
+            await this.fetchChannelsList()
+            await this.seekChannelIds()
+            await this.seekPublicationState()
+            this.writeSourceFile(contentSourceFilePath)
+        }
+
+        this.findChannels()
+        await this.terraform()
+    }
+
+    /********************
+     * Destination Folder
+     ********************/
+
+    async seekDestFolder() {
+        if (this.parsedFlags.dest) {
+            this.destFolder = this.parsedFlags.dest
         } else {
             let destFolderAnswer: any = await askDestDir()
-            destFolder = destFolderAnswer.path
+            this.destFolder = destFolderAnswer.path
+        }
+
+        if (!this.destFolder) {
+            signal.error("No destination folder selected")
+            this.exit(1)
         }
 
         // Create top directory to place all content in. Create if not exists.
-        this.spinner.start(`Checking destination directory ${chalk.blue(destFolder)}`)
+        this.spinner.start(`Checking destination directory ${chalk.blue(this.destFolder)}`)
         try {
-            ensureDirSync(destFolder)
-            this.spinner.succeed(`Destination directory exists ${chalk.blue(destFolder)}`)
+            fs.ensureDirSync(this.destFolder)
+            this.spinner.succeed(`Destination directory exists ${chalk.blue(this.destFolder)}`)
         } catch (error) {
-            this.spinner.fail(`Destination directory not created ${chalk.red(destFolder)}`)
+            this.spinner.fail(`Destination directory not created ${chalk.red(this.destFolder)}`)
             signal.fatal(error)
             this.exit(1)
         }
 
-        if (flags.overwrite) {
+        if (this.parsedFlags.overwrite) {
             try {
-                emptyDirSync(destFolder)
+                fs.emptyDirSync(this.destFolder)
                 this.spinner.succeed(
-                    `All files deleted in destination directory ${chalk.blue(destFolder)}`,
+                    `All files deleted in destination directory ${chalk.blue(this.destFolder)}`,
                 )
             } catch (error) {
                 this.spinner.fail(
-                    `Error while cleaning destination directory ${chalk.red(destFolder)}`,
+                    `Error while cleaning destination directory ${chalk.red(this.destFolder)}`,
                 )
                 signal.fatal(error)
                 this.exit(1)
             }
         }
+    }
 
-        /********************
-         * Channels
-         ********************/
+    /********************
+     * Source file
+     ********************/
 
-        let channelsList: Channel[] = []
-        let selectedChannelIds: number[]
-        let selectedChannels: Channel[]
+    writeSourceFile(contentSourceFilePath: string) {
+        let contentSource: ContentSource = {
+            channelIds: this.selectedChannelIds,
+            publicationStateIds: this.publicationStateIds,
+        }
+        fs.writeFileSync(contentSourceFilePath, JSON.stringify(contentSource, null, 4))
+    }
 
+    loadSourceFile(contentSourceFilePath: string) {
+        signal.info(chalk.magenta(`Using source configuration from ${contentSourceFilePath}`))
+        try {
+            let contentSourceFile = fs.readFileSync(contentSourceFilePath, "utf8")
+            let contentSource: ContentSource = JSON.parse(contentSourceFile)
+            this.selectedChannelIds = contentSource.channelIds
+            this.publicationStateIds = contentSource.publicationStateIds
+        } catch (error) {
+            signal.fatal(
+                "Error while reading source configuration file. You should probably delete it and call the command again.",
+            )
+            signal.fatal(error)
+            this.exit(1)
+        }
+    }
+
+    /********************
+     * Channels
+     ********************/
+
+    async fetchChannelsList() {
         // Get channels list
         try {
             this.spinner.start("Get channels list")
@@ -90,39 +151,44 @@ export default class Pull extends BaseCommand {
                 // Ask the server to serialize the prosemirror description to markdown
                 format_description: "markdown",
             })
-            channelsList = firstPage.objects
+            this.channelsList = firstPage.objects
             this.spinner.succeed("Channels list downloaded")
         } catch (error) {
             this.spinner.fail("Error while downloading channels list")
             signal.fatal(error)
             this.exit(1)
         }
+    }
 
+    async seekChannelIds() {
         // Figure out which channel ids the user want to terraform
-        if (flags.channel) {
-            selectedChannelIds = flags.channel
+        if (this.parsedFlags.channel) {
+            this.selectedChannelIds = this.parsedFlags.channel
         } else {
-            let answer = await askChannels(channelsList)
-            selectedChannelIds = answer.channel
+            let answer = await askChannels(this.channelsList)
+            this.selectedChannelIds = answer.channel
         }
+    }
 
+    findChannels() {
         // Find the corresponding channels, and remove ids without correspondence
-        selectedChannels = selectedChannelIds
-            .map((channelId) => channelsList.find((channel) => channel.id == channelId))
+        this.selectedChannels = this.selectedChannelIds
+            .map((channelId) => this.channelsList.find((channel) => channel.id == channelId))
             .filter((channel): channel is Channel => channel != undefined)
 
-        if (selectedChannels.length == 0) {
-            return
+        if (this.selectedChannels.length == 0) {
+            signal.error("No channel selected")
+            this.exit(1)
         }
+    }
 
-        /********************
-         * Publication state
-         ********************/
+    /********************
+     * Publication state
+     ********************/
 
-        let publicationStateIds
-
-        if (flags.publicationState) {
-            publicationStateIds = flags.publicationState
+    async seekPublicationState() {
+        if (this.parsedFlags.publicationState) {
+            this.publicationStateIds = this.parsedFlags.publicationState
         } else {
             let statesList = []
             try {
@@ -137,16 +203,22 @@ export default class Pull extends BaseCommand {
             }
 
             let answer: any = await askPublicationStates(statesList)
-            publicationStateIds = answer.workflowState
+            this.publicationStateIds = answer.workflowState
         }
+    }
 
-        /********************
-         * Terraforming
-         ********************/
+    /********************
+     * Terraforming
+     ********************/
 
-        let terraformer = new Terraformer(this.draaftConfig, publicationStateIds)
+    async terraform() {
+        let terraformer = new Terraformer(
+            this.draaftConfig,
+            this.destFolder,
+            this.publicationStateIds,
+        )
 
-        for (let selectedChannel of selectedChannels) {
+        for (let selectedChannel of this.selectedChannels) {
             signal.terraforming(
                 chalk.magenta(
                     `Terrraforming channel ${selectedChannel.name} (${selectedChannel.id})`,
@@ -154,7 +226,7 @@ export default class Pull extends BaseCommand {
             )
 
             signal.terraforming(chalk.blue("Creating the directory hierarchy"))
-            terraformer.terraformChannel(selectedChannel, destFolder)
+            terraformer.terraformChannel(selectedChannel)
 
             signal.terraforming(chalk.blue("Creating the content files"))
             // Get items and write them to disk

@@ -24,6 +24,11 @@ export type DraaftConfiguration = {
     useChannelName: boolean
 }
 
+export type ContentSource = {
+    channelIds: number[]
+    publicationStateIds: number[]
+}
+
 export type ChannelHierarchyNode = any
 export type ChannelHierarchy = Array<ChannelHierarchyNode>
 

@@ -31,14 +31,16 @@ const matterEngines = {
 
 export class Terraformer {
     config: DraaftConfiguration
+    destFolder: string
     publicationStateIds: number[]
 
     /**
      * Terraform pilot content to SSG content
      * @param config - Draaft configuration
      */
-    constructor(config: DraaftConfiguration, publicationStateIds: number[]) {
+    constructor(config: DraaftConfiguration, destFolder: string, publicationStateIds: number[]) {
         this.config = config
+        this.destFolder = destFolder
         this.publicationStateIds = publicationStateIds
     }
 
@@ -50,13 +52,13 @@ export class Terraformer {
         })
     }
 
-    terraformChannel(channel: Channel, parentPath: string): void {
+    terraformChannel(channel: Channel): void {
         let channelDirPath
         if (this.config.useChannelName) {
             let channelSlug = slugify(channel.name)
-            channelDirPath = path.join(parentPath, channelSlug)
+            channelDirPath = path.join(this.destFolder, channelSlug)
         } else {
-            channelDirPath = parentPath
+            channelDirPath = this.destFolder
         }
 
         // Create channel directory

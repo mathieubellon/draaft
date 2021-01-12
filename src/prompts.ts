@@ -43,7 +43,6 @@ export function askChannels(channelsList: Channel[]): Promise<{ channel: number[
 export function askPublicationStates(
     statesList: WorkflowState[],
 ): Promise<{ workflowState: number[] }> {
-    console.log(statesList[0])
     let choices = _.map(statesList, (state) => {
         return {
             name: state.label,
