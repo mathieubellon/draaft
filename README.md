@@ -11,12 +11,12 @@ Draaft is a command line tool that simply allows you to retrieve content produce
 [![License](https://img.shields.io/npm/l/draaft.svg)](https://github.com/draaft/cli/blob/master/package.json) -->
 
 <!-- toc -->
-
--   [Installing](#installing)
--   [Usage](#usage)
--   [Configuration](#configuration)
--   [Commands](#commands)
--   [Roadmap](#roadmap)
+* [Draaft](#draaft)
+* [Installing](#installing)
+* [Usage](#usage)
+* [Configuration](#configuration)
+* [Commands](#commands)
+* [Roadmap](#roadmap)
 <!-- tocstop -->
 
 # Installing
@@ -36,12 +36,17 @@ $ yarn global add draaft
 # Usage
 
 <!-- usage -->
-
-```bash
-$ draaft layout
-$ draaft pull --channel=CHANNEL_ID --dest=content
+```sh-session
+$ npm install -g draaft
+$ draaft COMMAND
+running command...
+$ draaft (-v|--version|version)
+draaft/0.1.0-alpha7 win32-x64 node-v12.20.0
+$ draaft --help [COMMAND]
+USAGE
+  $ draaft COMMAND
+...
 ```
-
 <!-- usagestop -->
 
 # Configuration
@@ -91,12 +96,11 @@ Only the API token will be prompted.
 # Commands
 
 <!-- commands -->
-
--   [`draaft help [COMMAND]`](#draaft-help-command)
--   [`draaft layout`](#draaft-layout)
--   [`draaft pull`](#draaft-pull)
--   [`draaft states`](#draaft-states)
--   [`draaft types [ID]`](#draaft-types-id)
+* [`draaft help [COMMAND]`](#draaft-help-command)
+* [`draaft layout`](#draaft-layout)
+* [`draaft pull`](#draaft-pull)
+* [`draaft states`](#draaft-states)
+* [`draaft types [ID]`](#draaft-types-id)
 
 ## `draaft help [COMMAND]`
 
@@ -129,7 +133,7 @@ OPTIONS
   -s, --ssg=ssg    Static site generator
 ```
 
-_See code: [src\commands\layout.ts](https://github.com/hbyio/draaft/blob/v0.0.1-alpha2/src\commands\layout.ts)_
+_See code: [src\commands\layout.ts](https://github.com/hbyio/draaft/blob/v0.1.0-alpha7/src\commands\layout.ts)_
 
 ## `draaft pull`
 
@@ -140,14 +144,15 @@ USAGE
   $ draaft pull
 
 OPTIONS
-  -h, --help         show CLI help
-  -o, --overwrite    Empty destination directory before writing
-  --channel=channel  Channel to pull content from [int]
-  --dest=dest        Destination directory where to write files
-  --ssg=hugo|gatsby  [default: hugo] Your static site generator.
+  -h, --help                           show CLI help
+  -o, --overwrite                      Empty destination directory before writing
+  --channel=channel                    [int] [multiple] Channel to pull content from
+  --dest=dest                          Destination directory where to write files
+  --publicationState=publicationState  [int] [multiple] workflow state for a published content
+  --ssg=hugo|gatsby                    [default: hugo] Your static site generator.
 ```
 
-_See code: [src\commands\pull.ts](https://github.com/hbyio/draaft/blob/v0.0.1-alpha2/src\commands\pull.ts)_
+_See code: [src\commands\pull.ts](https://github.com/hbyio/draaft/blob/v0.1.0-alpha7/src\commands\pull.ts)_
 
 ## `draaft states`
 
@@ -163,7 +168,7 @@ OPTIONS
   -s, --save    Save states as file for customisation
 ```
 
-_See code: [src\commands\states.ts](https://github.com/hbyio/draaft/blob/v0.0.1-alpha2/src\commands\states.ts)_
+_See code: [src\commands\states.ts](https://github.com/hbyio/draaft/blob/v0.1.0-alpha7/src\commands\states.ts)_
 
 ## `draaft types [ID]`
 
@@ -183,8 +188,7 @@ OPTIONS
   -w, --schema  Display content schema for each type
 ```
 
-_See code: [src\commands\types.ts](https://github.com/hbyio/draaft/blob/v0.0.1-alpha2/src\commands\types.ts)_
-
+_See code: [src\commands\types.ts](https://github.com/hbyio/draaft/blob/v0.1.0-alpha7/src\commands\types.ts)_
 <!-- commandsstop -->
 
 # Roadmap
@@ -211,3 +215,15 @@ _See code: [src\commands\types.ts](https://github.com/hbyio/draaft/blob/v0.0.1-a
 -   [ ] Support Gatsby
 -   [ ] Generate complete layout for Hugo and Gatsby with theme selector
 -   [ ] Tests
+
+# Deploying to npm
+
+Manually bump version number in package.json, then
+
+```
+[optionnal, only if a command has changed] yarn readme
+yarn prepack
+git add .
+git commit
+yarn publish
+```
